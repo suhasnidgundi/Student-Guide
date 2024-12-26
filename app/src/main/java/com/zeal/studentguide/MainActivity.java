@@ -1,21 +1,20 @@
 package com.zeal.studentguide;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.google.firebase.FirebaseApp;
+import com.zeal.studentguide.activities.AdminDashboardActivity;
+import com.zeal.studentguide.activities.FacultyDashboardActivity;
+import com.zeal.studentguide.activities.LoginActivity;
+import com.zeal.studentguide.activities.StudentDashboardActivity;
 import com.zeal.studentguide.databinding.*;
 import com.zeal.studentguide.utils.PreferenceManager;
 
 public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding mainActivityBinding;
-    private ActivityLoginBinding loginActivityBinding;
-
-    private ActivityStudentDashboardBinding studentDashboardActivityBinding;
-    private ActivityFacultyDashboardBinding facultyDashboardActivityBinding;
-    private ActivityAdminDashboardBinding adminDashboardActivityBinding;
-
     private PreferenceManager preferenceManager;
 
     @Override
@@ -31,23 +30,33 @@ public class MainActivity extends AppCompatActivity {
 
     private void checkUserRoleAndNavigate() {
         if (!preferenceManager.isLoggedIn()) {
-            loginActivityBinding = ActivityLoginBinding.inflate(getLayoutInflater());
-            setContentView(loginActivityBinding.getRoot());
+            Intent loginIntent = new Intent(this, LoginActivity.class);
+            startActivity(loginIntent);
+            finish();
+            return;
         }
 
+        Intent dashboardIntent;
         switch (preferenceManager.getUserRole()) {
             case "admin":
-                adminDashboardActivityBinding = ActivityAdminDashboardBinding.inflate(getLayoutInflater());
-                setContentView(adminDashboardActivityBinding.getRoot());
+                dashboardIntent = new Intent(this, AdminDashboardActivity.class);
                 break;
             case "faculty":
-                facultyDashboardActivityBinding = ActivityFacultyDashboardBinding.inflate(getLayoutInflater());
-                setContentView(facultyDashboardActivityBinding.getRoot());
+                dashboardIntent = new Intent(this, FacultyDashboardActivity.class);
                 break;
-            default: // student
-                studentDashboardActivityBinding = ActivityStudentDashboardBinding.inflate(getLayoutInflater());
-                setContentView(studentDashboardActivityBinding.getRoot());
+            case "student":
+                dashboardIntent = new Intent(this, StudentDashboardActivity.class);
                 break;
+            default:
+                // Handle unknown role or logout
+                preferenceManager.clearPreferences();
+                Intent loginIntent = new Intent(this, LoginActivity.class);
+                startActivity(loginIntent);
+                finish();
+                return;
         }
+
+        startActivity(dashboardIntent);
+        finish();
     }
 }

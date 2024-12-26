@@ -1,5 +1,6 @@
 package com.zeal.studentguide.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -28,8 +29,8 @@ public class StudentDashboardActivity extends AppCompatActivity {
     }
 
     private void setupClickListeners() {
-//        binding.cardVirtualTour.setOnClickListener(v -> startActivity(new Intent(this, VirtualTourActivity.class)));
-//        binding.cardAcademics.setOnClickListener(v -> startActivity(new Intent(this, AcademicsActivity.class)));
+        binding.cardVirtualTour.setOnClickListener(v -> startActivity(new Intent(this, VirtualCollegeTourActivity.class)));
+        binding.cardAcademics.setOnClickListener(v -> startActivity(new Intent(this, AcademicsActivity.class)));
 //        binding.cardFacilities.setOnClickListener(v -> startActivity(new Intent(this, FacilitiesActivity.class)));
 //        binding.cardAdmission.setOnClickListener(v -> startActivity(new Intent(this, AdmissionActivity.class)));
     }

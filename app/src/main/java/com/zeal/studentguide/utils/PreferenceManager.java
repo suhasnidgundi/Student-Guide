@@ -42,4 +42,5 @@ public class PreferenceManager {
     public void clearPreferences() {
         preferences.edit().clear().apply();
     }
+
 }

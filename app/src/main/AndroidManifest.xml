@@ -23,14 +23,24 @@
         android:theme="@style/Theme.StudentGuide">
 
         <activity
-            android:name=".activities.SplashActivity"
-            android:exported="true"
-            android:theme="@style/Theme.StudentGuide.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:name=".activities.AcademicsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.AdminDashboardActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.EditProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.FacultyDashboardActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activities.LoginActivity"
@@ -43,12 +53,21 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
-            android:name=".activities.FacultyDashboardActivity"
+            android:name=".activities.SplashActivity"
+            android:exported="true"
+            android:theme="@style/Theme.StudentGuide.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+        <activity
+            android:name=".activities.StudentDashboardActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity
-            android:name=".activities.AdminDashboardActivity"
+        <activity android:name=".activities.VirtualCollegeTourActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
