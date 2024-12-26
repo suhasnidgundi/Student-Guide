@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "928977017254",
+    "project_id": "student-guide-01",
+    "storage_bucket": "student-guide-01.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:928977017254:android:2b0018d79a8c0d43181767",
+        "android_client_info": {
+          "package_name": "com.zeal.studentguide"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBHmf7WORRfibzlB_dPZ4OWYGaI6TkUDuc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
