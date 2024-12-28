@@ -5,6 +5,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
@@ -28,14 +30,18 @@ public class EditProfileActivity extends AppCompatActivity {
     private Uri selectedImageUri;
     private Student currentStudent;
 
+    private final String[] years = new String[]{"1", "2", "3", "4"};
+    private final String[] semestersYear1 = new String[]{"1", "2"};
+    private final String[] semestersYear2 = new String[]{"3", "4"};
+    private final String[] semestersYear3 = new String[]{"5", "6"};
+    private final String[] semestersYear4 = new String[]{"7", "8"};
+
     private final ActivityResultLauncher<Intent> pickImage = registerForActivityResult(
             new ActivityResultContracts.StartActivityForResult(),
             result -> {
-                if (result.getResultCode() == RESULT_OK) {
-                    if (result.getData() != null) {
-                        selectedImageUri = result.getData().getData();
-                        binding.imageProfile.setImageURI(selectedImageUri);
-                    }
+                if (result.getResultCode() == RESULT_OK && result.getData() != null) {
+                    selectedImageUri = result.getData().getData();
+                    binding.imageProfile.setImageURI(selectedImageUri);
                 }
             }
     );
@@ -51,6 +57,7 @@ public class EditProfileActivity extends AppCompatActivity {
         storage = FirebaseStorage.getInstance();
 
         setupToolbar();
+        setupDropdowns();
         loadStudentProfile();
         setupClickListeners();
     }
@@ -103,6 +110,50 @@ public class EditProfileActivity extends AppCompatActivity {
         binding.buttonSave.setOnClickListener(v -> saveChanges());
     }
 
+    private void setupDropdowns() {
+        // Setup Year dropdown
+        ArrayAdapter<String> yearAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                years
+        );
+        ((AutoCompleteTextView) binding.inputYear).setAdapter(yearAdapter);
+
+        // Year selection listener
+        ((AutoCompleteTextView) binding.inputYear).setOnItemClickListener((parent, view, position, id) -> {
+            String selectedYear = years[position];
+            updateSemesterDropdown(selectedYear);
+        });
+    }
+
+    private void updateSemesterDropdown(String year) {
+        String[] availableSemesters;
+        switch (year) {
+            case "1":
+                availableSemesters = semestersYear1;
+                break;
+            case "2":
+                availableSemesters = semestersYear2;
+                break;
+            case "3":
+                availableSemesters = semestersYear3;
+                break;
+            case "4":
+                availableSemesters = semestersYear4;
+                break;
+            default:
+                availableSemesters = new String[]{};
+        }
+
+        ArrayAdapter<String> semesterAdapter = new ArrayAdapter<>(
+                this,
+                android.R.layout.simple_dropdown_item_1line,
+                availableSemesters
+        );
+        ((AutoCompleteTextView) binding.inputSemester).setText("");
+        ((AutoCompleteTextView) binding.inputSemester).setAdapter(semesterAdapter);
+    }
+
     private void saveChanges() {
         if (!validateInput()) return;
 
@@ -113,9 +164,9 @@ public class EditProfileActivity extends AppCompatActivity {
         currentStudent.setEmail(binding.inputEmail.getText().toString());
         currentStudent.setRollNumber(binding.inputRollNumber.getText().toString());
         currentStudent.setBranch(binding.inputBranch.getText().toString());
-        currentStudent.setSemester(binding.inputSemester.getText().toString());
+        currentStudent.setCurrentYear(Integer.parseInt(((AutoCompleteTextView) binding.inputYear).getText().toString()));
+        currentStudent.setSemester(((AutoCompleteTextView) binding.inputSemester).getText().toString());
 
-        // If new image is selected, upload it first
         if (selectedImageUri != null) {
             uploadImageAndSaveProfile();
         } else {
@@ -163,7 +214,48 @@ public class EditProfileActivity extends AppCompatActivity {
             showToast("Please enter your full name");
             return false;
         }
-        // Add more validation as needed
+
+        String selectedYear = ((AutoCompleteTextView) binding.inputYear).getText().toString();
+        String selectedSemester = ((AutoCompleteTextView) binding.inputSemester).getText().toString();
+
+        if (selectedYear.isEmpty()) {
+            showToast("Please select your year");
+            return false;
+        }
+
+        if (selectedSemester.isEmpty()) {
+            showToast("Please select your semester");
+            return false;
+        }
+
+        // Validate semester based on year
+        int year = Integer.parseInt(selectedYear);
+        int semester = Integer.parseInt(selectedSemester);
+
+        boolean isValid;
+        switch (year) {
+            case 1:
+                isValid = semester >= 1 && semester <= 2;
+                break;
+            case 2:
+                isValid = semester >= 3 && semester <= 4;
+                break;
+            case 3:
+                isValid = semester >= 5 && semester <= 6;
+                break;
+            case 4:
+                isValid = semester >= 7 && semester <= 8;
+                break;
+            default:
+                isValid = false;
+                break;
+        }
+
+        if (!isValid) {
+            showToast("Invalid semester for selected year");
+            return false;
+        }
+
         return true;
     }
 

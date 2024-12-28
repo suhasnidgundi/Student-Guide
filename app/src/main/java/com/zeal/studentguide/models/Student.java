@@ -2,12 +2,9 @@ package com.zeal.studentguide.models;
 
 import androidx.room.Entity;
 import androidx.room.ForeignKey;
-import androidx.room.Ignore;
 import androidx.room.Index;
-import androidx.room.PrimaryKey;
 import androidx.annotation.NonNull;
-
-import com.google.firebase.firestore.Exclude;
+import androidx.room.PrimaryKey;
 import com.google.firebase.firestore.PropertyName;
 
 @Entity(tableName = "students",
@@ -29,12 +26,10 @@ public class Student {
     private String semester;
     private String branch;
     private String batch;
-    private double cgpa;
 
     @PropertyName("current_year")
     private int currentYear;
 
-    // Additional fields for profile
     @PropertyName("profile_image_url")
     private String profileImageUrl;
 
@@ -51,16 +46,18 @@ public class Student {
     @PropertyName("active_backlog_count")
     private int activeBacklogCount;
 
-    // Default constructor for Firebase
-    @Ignore
-    public Student() {}
+    private String course;
+    private double cgpa;
 
-    // Constructor for Room
-    public Student(@NonNull String studentId, String rollNumber, String semester, String branch) {
+
+    // Constructor matching the usage in AddUserActivity
+    public Student(@NonNull String studentId) {
         this.studentId = studentId;
-        this.rollNumber = rollNumber;
-        this.semester = semester;
-        this.branch = branch;
+    }
+
+    // Default constructor required for Firestore
+    public Student() {
+        this.studentId = "";
     }
 
     // Getters and Setters
@@ -68,40 +65,41 @@ public class Student {
     public String getStudentId() { return studentId; }
     public void setStudentId(@NonNull String studentId) { this.studentId = studentId; }
 
-    @PropertyName("roll_number")
-    public String getRollNumber() { return rollNumber; }
-    @PropertyName("roll_number")
-    public void setRollNumber(String rollNumber) { this.rollNumber = rollNumber; }
+    public String getCourse() { return course; }
+    public void setCourse(String course) { this.course = course; }
 
     public String getSemester() { return semester; }
     public void setSemester(String semester) { this.semester = semester; }
 
-    public String getBranch() { return branch; }
-    public void setBranch(String branch) { this.branch = branch; }
-
     public String getBatch() { return batch; }
     public void setBatch(String batch) { this.batch = batch; }
 
+    public String getRollNumber() { return rollNumber; }
+    public void setRollNumber(String rollNumber) { this.rollNumber = rollNumber; }
+
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
+
+    public String getFullName() { return fullName; }
+    public void setFullName(String fullName) { this.fullName = fullName; }
+
+    public String getBranch() { return branch; }
+    public void setBranch(String branch) { this.branch = branch; }
+
     public double getCgpa() { return cgpa; }
     public void setCgpa(double cgpa) { this.cgpa = cgpa; }
+
 
     @PropertyName("current_year")
     public int getCurrentYear() { return currentYear; }
     @PropertyName("current_year")
     public void setCurrentYear(int currentYear) { this.currentYear = currentYear; }
 
+    
     @PropertyName("profile_image_url")
     public String getProfileImageUrl() { return profileImageUrl; }
     @PropertyName("profile_image_url")
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
-
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
-
-    @PropertyName("full_name")
-    public String getFullName() { return fullName; }
-    @PropertyName("full_name")
-    public void setFullName(String fullName) { this.fullName = fullName; }
 
     @PropertyName("attendance_percentage")
     public double getAttendancePercentage() { return attendancePercentage; }
@@ -117,13 +115,4 @@ public class Student {
         this.activeBacklogCount = activeBacklogCount;
     }
 
-    // Helper method to check if profile is complete
-    @Exclude
-    public boolean isProfileComplete() {
-        return false;
-    }
-
-    public String getDepartment() {
-        return null;
-    }
 }

@@ -1,6 +1,6 @@
 package com.zeal.studentguide.database.dao;
 
-import androidx.room.*;
+import androidx.lifecycle.LiveData;import androidx.room.*;
 import com.zeal.studentguide.models.Faculty;
 import java.util.List;
 
@@ -15,12 +15,11 @@ public interface FacultyDao {
     @Delete
     void delete(Faculty faculty);
 
-    @Query("SELECT * FROM faculty WHERE facultyId = :facultyId")
-    Faculty getFacultyById(String facultyId);
-
     @Query("SELECT * FROM faculty WHERE department = :department")
     List<Faculty> getFacultyByDepartment(String department);
 
     @Query("SELECT * FROM faculty")
-    List<Faculty> getAllFaculty();
+    LiveData<List<Faculty>> getAllFaculty();
+
+
 }

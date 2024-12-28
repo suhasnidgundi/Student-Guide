@@ -3,11 +3,15 @@ package com.zeal.studentguide.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.zeal.studentguide.models.UserRole;
+
 public class PreferenceManager {
     private static final String PREF_NAME = "StudentGuidePrefs";
     private static final String KEY_IS_LOGGED_IN = "isLoggedIn";
     private static final String KEY_USER_ROLE = "userRole";
     private static final String KEY_USER_ID = "userId";
+
+    private static final String KEY_USERNAME = "username";
 
     private SharedPreferences preferences;
 
@@ -23,8 +27,8 @@ public class PreferenceManager {
         return preferences.getBoolean(KEY_IS_LOGGED_IN, false);
     }
 
-    public void setUserRole(String role) {
-        preferences.edit().putString(KEY_USER_ROLE, role).apply();
+    public void setUserRole(UserRole role) {
+        preferences.edit().putString(KEY_USER_ROLE, String.valueOf(role)).apply();
     }
 
     public String getUserRole() {
@@ -38,6 +42,12 @@ public class PreferenceManager {
     public String getUserId() {
         return preferences.getString(KEY_USER_ID, "");
     }
+
+    public void setUsername(String username){
+        preferences.edit().putString(KEY_USERNAME, username).apply();
+    }
+
+    public String getUsername(){ return preferences.getString(KEY_USERNAME, "");}
 
     public void clearPreferences() {
         preferences.edit().clear().apply();

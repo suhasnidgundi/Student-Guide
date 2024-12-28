@@ -2,6 +2,8 @@ package com.zeal.studentguide;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -25,6 +27,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(mainActivityBinding.getRoot());
 
         preferenceManager = new PreferenceManager(this);
+
         checkUserRoleAndNavigate();
     }
 
@@ -38,13 +41,13 @@ public class MainActivity extends AppCompatActivity {
 
         Intent dashboardIntent;
         switch (preferenceManager.getUserRole()) {
-            case "admin":
+            case "ADMIN":
                 dashboardIntent = new Intent(this, AdminDashboardActivity.class);
                 break;
-            case "faculty":
+            case "FACULTY":
                 dashboardIntent = new Intent(this, FacultyDashboardActivity.class);
                 break;
-            case "student":
+            case "STUDENT":
                 dashboardIntent = new Intent(this, StudentDashboardActivity.class);
                 break;
             default:

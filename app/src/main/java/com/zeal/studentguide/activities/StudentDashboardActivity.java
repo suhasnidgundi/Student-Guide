@@ -2,15 +2,21 @@ package com.zeal.studentguide.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.PopupMenu;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.zeal.studentguide.databinding.ActivityStudentDashboardBinding;
+import com.zeal.studentguide.utils.FirebaseManager;
 import com.zeal.studentguide.utils.PreferenceManager;
+import com.zeal.studentguide.R;
 
 public class StudentDashboardActivity extends AppCompatActivity {
     private ActivityStudentDashboardBinding binding;
     private PreferenceManager preferenceManager;
+    private FirebaseManager firebaseManager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,20 +24,91 @@ public class StudentDashboardActivity extends AppCompatActivity {
         binding = ActivityStudentDashboardBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Initialize FirebaseManager
+        firebaseManager = FirebaseManager.getInstance();
         preferenceManager = new PreferenceManager(this);
+
+        // Check if user is logged in, if not redirect to login
+        if (!preferenceManager.isLoggedIn()) {
+            redirectToLogin();
+            return;
+        }
+
         setupProfile();
         setupClickListeners();
     }
 
+    private void logout() {
+        // Show loading indicator if you have one
+        // binding.progressBar.setVisibility(View.VISIBLE);
+
+        firebaseManager.logout(this, new FirebaseManager.FirebaseCallback<Void>() {
+            @Override
+            public void onSuccess(Void result) {
+                // Clear preferences first
+                preferenceManager.clearPreferences();
+
+                runOnUiThread(() -> {
+                    // Hide loading indicator if you have one
+                    // binding.progressBar.setVisibility(View.GONE);
+                    redirectToLogin();
+                });
+            }
+
+            @Override
+            public void onError(Exception e) {
+                runOnUiThread(() -> {
+                    // Hide loading indicator if you have one
+                    // binding.progressBar.setVisibility(View.GONE);
+                    Toast.makeText(StudentDashboardActivity.this,
+                            "Logout failed: " + e.getMessage(),
+                            Toast.LENGTH_SHORT).show();
+                });
+            }
+        });
+    }
+
+    private void redirectToLogin() {
+        Intent intent = new Intent(StudentDashboardActivity.this, LoginActivity.class);
+        // Clear the back stack so user can't go back after logout
+        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+        startActivity(intent);
+        finish();
+    }
+
+    // Rest of your existing code remains the same
     private void setupProfile() {
-        String studentName = preferenceManager.getUserId();
+        String studentName = preferenceManager.getUsername();
         binding.textStudentName.setText(studentName);
+
+
+
+        binding.imageProfile.setOnClickListener(this::showProfileMenu);
+    }
+
+    private void showProfileMenu(View view) {
+        PopupMenu popup = new PopupMenu(this, view);
+        popup.getMenuInflater().inflate(R.menu.profile_menu, popup.getMenu());
+
+        popup.setOnMenuItemClickListener(item -> {
+            int itemId = item.getItemId();
+            if (itemId == R.id.menuEditProfile) {
+                startActivity(new Intent(this, EditProfileActivity.class));
+                return true;
+            } else if (itemId == R.id.menuLogout) {
+                logout();
+                return true;
+            }
+            return false;
+        });
+
+        popup.show();
     }
 
     private void setupClickListeners() {
-        binding.cardVirtualTour.setOnClickListener(v -> startActivity(new Intent(this, VirtualCollegeTourActivity.class)));
-        binding.cardAcademics.setOnClickListener(v -> startActivity(new Intent(this, AcademicsActivity.class)));
-//        binding.cardFacilities.setOnClickListener(v -> startActivity(new Intent(this, FacilitiesActivity.class)));
-//        binding.cardAdmission.setOnClickListener(v -> startActivity(new Intent(this, AdmissionActivity.class)));
+        binding.cardVirtualTour.setOnClickListener(v ->
+                startActivity(new Intent(this, VirtualCollegeTourActivity.class)));
+        binding.cardAcademics.setOnClickListener(v ->
+                startActivity(new Intent(this, AcademicsActivity.class)));
     }
 }

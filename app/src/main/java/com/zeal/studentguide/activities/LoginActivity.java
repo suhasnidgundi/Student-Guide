@@ -2,7 +2,6 @@ package com.zeal.studentguide.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
@@ -49,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
                     preferenceManager.setLoggedIn(true);
                     preferenceManager.setUserRole(user.getRole());
                     preferenceManager.setUserId(user.getUserId());
+                    preferenceManager.setUsername(user.getName());
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();

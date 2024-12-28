@@ -11,8 +11,9 @@
 
     <!-- Add array for user roles -->
     <string-array name="user_roles">
-        <item>student</item>
-        <item>faculty</item>
-        <item>admin</item>
+        <item>STUDENT</item>
+        <item>FACULTY</item>
+        <item>ADMIN</item>
     </string-array>
+
 </resources>

@@ -11,13 +11,20 @@ public class User {
     private String userId;
     private String email;
     private String name;
-    private String role;
+
+    @NonNull
+    private UserRole role;
     private String profileImageUrl;
     private String phoneNumber;
     private boolean isActive;
 
+    private boolean isEmailVerified;
+    private String lastLoginDate;
+    private String registrationDate;
+
+
     // Constructor
-    public User(@NonNull String userId, String email, String name, String role) {
+    public User(@NonNull String userId, String email, String name, UserRole role) {
         this.userId = userId;
         this.email = email;
         this.name = name;
@@ -31,7 +38,7 @@ public class User {
         this.userId = "";
         this.email = "";
         this.name = "";
-        this.role = "";
+        this.role = UserRole.USER;
         this.profileImageUrl = "";
         this.phoneNumber = "";
     }
@@ -48,8 +55,9 @@ public class User {
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 
-    public String getRole() { return role; }
-    public void setRole(String role) { this.role = role; }
+    public UserRole getRole() { return role; }
+
+    public void setRole(UserRole role) { this.role = role; }
 
     public String getProfileImageUrl() { return profileImageUrl; }
     public void setProfileImageUrl(String profileImageUrl) { this.profileImageUrl = profileImageUrl; }
@@ -59,4 +67,28 @@ public class User {
 
     public boolean isActive() { return isActive; }
     public void setActive(boolean active) { isActive = active; }
+
+    public boolean isEmailVerified() {
+        return isEmailVerified;
+    }
+
+    public String getLastLoginDate() {
+        return lastLoginDate;
+    }
+
+    public void setLastLoginDate(String lastLoginDate) {
+        this.lastLoginDate = lastLoginDate;
+    }
+
+    public String getRegistrationDate() {
+        return registrationDate;
+    }
+
+    public void setRegistrationDate(String registrationDate) {
+        this.registrationDate = registrationDate;
+    }
+
+    public void setEmailVerified(boolean emailVerified) {
+        isEmailVerified = emailVerified;
+    }
 }

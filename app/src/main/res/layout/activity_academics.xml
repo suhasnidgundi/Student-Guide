@@ -144,11 +144,20 @@
                         android:textSize="18sp"
                         android:textStyle="bold" />
 
-                    <TextView
-                        android:id="@+id/textCourses"
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/recyclerViewCourses"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginTop="8dp" />
+                        android:clipToPadding="false"
+                        android:padding="8dp"/>
+
+                    <TextView
+                        android:id="@+id/textNoCourses"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:text="No courses available"
+                        android:textAlignment="center"
+                        android:visibility="gone"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 

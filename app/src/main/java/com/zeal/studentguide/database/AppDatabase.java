@@ -15,7 +15,7 @@ import com.zeal.studentguide.database.dao.*;
                 Faculty.class,
                 Course.class,
                 Notification.class,
-                StudentCourseEnrollment.class
+                CourseEnrollment.class
         },
         version = 1,
         exportSchema = false

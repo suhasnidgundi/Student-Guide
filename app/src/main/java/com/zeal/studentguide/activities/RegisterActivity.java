@@ -9,7 +9,9 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.zeal.studentguide.R;
 import com.zeal.studentguide.databinding.ActivityRegisterBinding;
+import com.zeal.studentguide.models.Student;
 import com.zeal.studentguide.models.User;
+import com.zeal.studentguide.models.UserRole;
 import com.zeal.studentguide.utils.FirebaseManager;
 import com.zeal.studentguide.utils.PreferenceManager;
 
@@ -51,7 +53,7 @@ public class RegisterActivity extends AppCompatActivity {
             String password = binding.editTextPassword.getText().toString().trim();
             String role = binding.spinnerRole.getSelectedItem().toString().trim();
 
-            firebaseManager.registerUser(name, email, password, role, new FirebaseManager.FirebaseCallback<User>() {
+            firebaseManager.registerUser(name, email, password, UserRole.valueOf(role), new FirebaseManager.FirebaseCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
                     hideLoading();
@@ -69,8 +71,6 @@ public class RegisterActivity extends AppCompatActivity {
                     Toast.makeText(RegisterActivity.this, e.getMessage(), Toast.LENGTH_SHORT).show();
                 }
             });
-
-            hideLoading();
         }
     }
 

@@ -28,12 +28,37 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.AddUserActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
             android:name=".activities.AdminDashboardActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.CourseDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.CourseListActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.CourseManagementActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".activities.EditProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.EditUserActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
@@ -68,6 +93,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity android:name=".activities.VirtualCollegeTourActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.UserManagementActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

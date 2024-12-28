@@ -1,22 +1,32 @@
 package com.zeal.studentguide.activities;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
+import com.zeal.studentguide.adapters.CourseListAdapter;
 import com.zeal.studentguide.databinding.ActivityAcademicsBinding;
+import com.zeal.studentguide.models.Course;
 import com.zeal.studentguide.models.Student;
 import com.zeal.studentguide.utils.PreferenceManager;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class AcademicsActivity extends AppCompatActivity {
     private ActivityAcademicsBinding binding;
     private PreferenceManager preferenceManager;
     private FirebaseFirestore database;
     private Student studentProfile;
+
+    private CourseListAdapter courseAdapter;
+    private List<Course> coursesList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,6 +36,18 @@ public class AcademicsActivity extends AppCompatActivity {
 
         preferenceManager = new PreferenceManager(this);
         database = FirebaseFirestore.getInstance();
+
+        coursesList = new ArrayList<>();
+        courseAdapter = new CourseListAdapter(coursesList, course -> {
+            // Handle course click
+            Intent intent = new Intent(this, CourseDetailActivity.class);
+            intent.putExtra("courseId", course.getCourseId());
+            startActivity(intent);
+        });
+
+        // Set up the RecyclerView
+        binding.recyclerViewCourses.setLayoutManager(new LinearLayoutManager(this));
+        binding.recyclerViewCourses.setAdapter(courseAdapter);
 
         setupToolbar();
         loadStudentProfile();
@@ -55,7 +77,7 @@ public class AcademicsActivity extends AppCompatActivity {
     }
 
     private void displayAcademicInfo() {
-        binding.textDepartment.setText(studentProfile.getDepartment());
+        binding.textDepartment.setText(studentProfile.getBranch());
         binding.textSemester.setText(studentProfile.getSemester());
         binding.textBatch.setText(studentProfile.getBatch());
         binding.textRollNumber.setText(studentProfile.getRollNumber());
@@ -67,19 +89,28 @@ public class AcademicsActivity extends AppCompatActivity {
 
     private void loadCourses() {
         database.collection("academics")
-                .document(studentProfile.getDepartment())
+                .document(studentProfile.getBranch())
                 .collection("semesters")
                 .document(studentProfile.getSemester())
                 .collection("courses")
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
-                    // Process and display courses
-                    StringBuilder coursesText = new StringBuilder();
+                    coursesList.clear();
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
-                        coursesText.append("• ").append(document.getString("name")).append("\n");
+                        Course course = document.toObject(Course.class);
+                        if (course != null) {
+                            coursesList.add(course);
+                        }
                     }
-                    binding.textCourses.setText(coursesText.toString());
-                });
+                    courseAdapter.notifyDataSetChanged();
+
+                    if (coursesList.isEmpty()) {
+                        binding.textNoCourses.setVisibility(View.VISIBLE);
+                    } else {
+                        binding.textNoCourses.setVisibility(View.GONE);
+                    }
+                })
+                .addOnFailureListener(e -> showToast("Error loading courses"));
     }
 
     private void loadAttendance() {
