@@ -46,7 +46,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
             @Override
             public void onSuccess(Void result) {
                 // Clear preferences first
-                preferenceManager.clearPreferences();
+                preferenceManager.clear();
 
                 runOnUiThread(() -> {
                     // Hide loading indicator if you have one
@@ -76,12 +76,10 @@ public class StudentDashboardActivity extends AppCompatActivity {
         finish();
     }
 
-    // Rest of your existing code remains the same
+
     private void setupProfile() {
         String studentName = preferenceManager.getUsername();
         binding.textStudentName.setText(studentName);
-
-
 
         binding.imageProfile.setOnClickListener(this::showProfileMenu);
     }

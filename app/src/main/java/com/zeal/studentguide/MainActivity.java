@@ -58,7 +58,7 @@ public class MainActivity extends AppCompatActivity {
                 break;
             default:
                 // Handle unknown role or logout
-                preferenceManager.clearPreferences();
+                preferenceManager.clear();
                 Intent loginIntent = new Intent(this, LoginActivity.class);
                 startActivity(loginIntent);
                 finish();

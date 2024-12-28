@@ -46,9 +46,10 @@ public class LoginActivity extends AppCompatActivity {
                 public void onSuccess(User user) {
                     hideLoading();
                     preferenceManager.setLoggedIn(true);
-                    preferenceManager.setUserRole(user.getRole());
                     preferenceManager.setUserId(user.getUserId());
                     preferenceManager.setUsername(user.getName());
+                    preferenceManager.setUserEmail(user.getEmail());
+                    preferenceManager.setUserRole(user.getRole());
 
                     startActivity(new Intent(LoginActivity.this, MainActivity.class));
                     finish();

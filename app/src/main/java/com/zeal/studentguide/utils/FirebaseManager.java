@@ -110,7 +110,7 @@ public class FirebaseManager {
     public void logout(Context context, FirebaseCallback<Void> callback) {
         // Clear local preferences first
         PreferenceManager preferenceManager = new PreferenceManager(context);
-        preferenceManager.clearPreferences();
+        preferenceManager.clear();
 
         // Sign out from Firebase Auth
         try {

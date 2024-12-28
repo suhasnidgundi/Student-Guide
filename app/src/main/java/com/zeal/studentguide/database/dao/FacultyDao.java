@@ -24,4 +24,7 @@ public interface FacultyDao {
     @Query("SELECT * FROM faculty")
     List<Faculty> getAllFacultySync();
 
+    @Query("SELECT * FROM faculty WHERE facultyId = :facultyId")
+    Faculty getFacultyById(String facultyId);
+
 }
