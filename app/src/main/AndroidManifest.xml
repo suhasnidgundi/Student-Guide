@@ -97,6 +97,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.UserDetailActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".activities.UserManagementActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

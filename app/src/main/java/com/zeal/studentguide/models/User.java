@@ -14,8 +14,8 @@ public class User {
 
     @NonNull
     private UserRole role;
-    private String profileImageUrl;
     private String phoneNumber;
+    private String profileImageUrl;
     private boolean isActive;
 
     private boolean isEmailVerified;

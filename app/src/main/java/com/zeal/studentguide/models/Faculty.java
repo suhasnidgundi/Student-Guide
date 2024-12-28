@@ -14,6 +14,7 @@ import androidx.room.PrimaryKey;
                 onDelete = ForeignKey.CASCADE
         ),
         indices = {@Index("facultyId")})
+
 public class Faculty {
     @PrimaryKey
     @NonNull
