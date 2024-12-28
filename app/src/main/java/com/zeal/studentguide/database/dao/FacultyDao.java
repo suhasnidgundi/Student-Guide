@@ -21,5 +21,7 @@ public interface FacultyDao {
     @Query("SELECT * FROM faculty")
     LiveData<List<Faculty>> getAllFaculty();
 
+    @Query("SELECT * FROM faculty")
+    List<Faculty> getAllFacultySync();
 
 }

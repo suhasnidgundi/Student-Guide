@@ -1,6 +1,7 @@
 package com.zeal.studentguide.activities;
 
-import android.annotation.SuppressLint;import android.content.Intent;
+import android.annotation.SuppressLint;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -11,8 +12,10 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
-import com.google.firebase.auth.FirebaseAuth;import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.WriteBatch;
 import com.zeal.studentguide.R;
 import com.zeal.studentguide.adapters.UserListAdapter;
 import com.zeal.studentguide.databinding.ActivityUserManagementBinding;
@@ -29,21 +32,21 @@ public class UserManagementActivity extends AppCompatActivity implements UserLis
     private List<User> users;
 
     @Override
-protected void onCreate(Bundle savedInstanceState) {
-    try {
-        super.onCreate(savedInstanceState);
-        binding = ActivityUserManagementBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
+    protected void onCreate(Bundle savedInstanceState) {
+        try {
+            super.onCreate(savedInstanceState);
+            binding = ActivityUserManagementBinding.inflate(getLayoutInflater());
+            setContentView(binding.getRoot());
 
-        init();
-        setupToolbar();
-        setupRecyclerView();
-        loadUsers();
-    } catch (Exception e) {
-        e.printStackTrace();
-        Toast.makeText(this, "Error initializing: " + e.getMessage(), Toast.LENGTH_LONG).show();
+            init();
+            setupToolbar();
+            setupRecyclerView();
+            loadUsers();
+        } catch (Exception e) {
+            e.printStackTrace();
+            Toast.makeText(this, "Error initializing: " + e.getMessage(), Toast.LENGTH_LONG).show();
+        }
     }
-}
 
     private void init() {
         db = FirebaseFirestore.getInstance();
@@ -64,45 +67,47 @@ protected void onCreate(Bundle savedInstanceState) {
         binding.recyclerViewUsers.setAdapter(userAdapter);
     }
 
-  @SuppressLint("NotifyDataSetChanged") private void loadUsers() {
-    try {
-        binding.progressBar.setVisibility(View.VISIBLE);
+    @SuppressLint("NotifyDataSetChanged")
+    private void loadUsers() {
+        try {
+            binding.progressBar.setVisibility(View.VISIBLE);
 
-        db.collection("users")
-                .get()
-                .addOnCompleteListener(task -> {
-                    try {
-                        runOnUiThread(() -> {
-                            binding.progressBar.setVisibility(View.GONE);
-                            if (task.isSuccessful() && task.getResult() != null) {
-                                users.clear();
-                                for (QueryDocumentSnapshot document : task.getResult()) {
-                                    try {
-                                        User user = document.toObject(User.class);
-                                        if (user != null) {
-                                            users.add(user);
+            db.collection("users")
+                    .get()
+                    .addOnCompleteListener(task -> {
+                        try {
+                            runOnUiThread(() -> {
+                                binding.progressBar.setVisibility(View.GONE);
+                                if (task.isSuccessful() && task.getResult() != null) {
+                                    users.clear();
+                                    for (QueryDocumentSnapshot document : task.getResult()) {
+                                        try {
+                                            User user = document.toObject(User.class);
+                                            if (user != null) {
+                                                users.add(user);
+                                            }
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
                                         }
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
                                     }
+                                    userAdapter.notifyDataSetChanged();
+                                    binding.textNoUsers.setVisibility(users.isEmpty() ? View.VISIBLE : View.GONE);
+                                } else {
+                                    showToast("Failed to load users: " +
+                                            (task.getException() != null ? task.getException().getMessage()
+                                                    : "Unknown error"));
                                 }
-                                userAdapter.notifyDataSetChanged();
-                                binding.textNoUsers.setVisibility(users.isEmpty() ? View.VISIBLE : View.GONE);
-                            } else {
-                                showToast("Failed to load users: " + 
-                                    (task.getException() != null ? task.getException().getMessage() : "Unknown error"));
-                            }
-                        });
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                        showToast("Error processing users: " + e.getMessage());
-                    }
-                });
-    } catch (Exception e) {
-        e.printStackTrace();
-        showToast("Error loading users: " + e.getMessage());
+                            });
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                            showToast("Error processing users: " + e.getMessage());
+                        }
+                    });
+        } catch (Exception e) {
+            e.printStackTrace();
+            showToast("Error loading users: " + e.getMessage());
+        }
     }
-}
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -135,7 +140,7 @@ protected void onCreate(Bundle savedInstanceState) {
     }
 
     private void showUserOptionsDialog(User user) {
-        String[] options = {"Edit", "Delete", "Cancel"};
+        String[] options = { "Edit", "Delete", "Cancel" };
 
         new AlertDialog.Builder(this)
                 .setTitle("User Options")
@@ -165,42 +170,37 @@ protected void onCreate(Bundle savedInstanceState) {
 
     private void deleteUser(User user) {
         binding.progressBar.setVisibility(View.VISIBLE);
-
-        // Get Firebase Auth instance
         FirebaseAuth auth = FirebaseAuth.getInstance();
 
-        // Delete from Firebase Authentication
-        auth.getCurrentUser().delete().addOnCompleteListener(task -> {
-            if (task.isSuccessful()) {
-                // Now delete from Firestore
-                // Delete from specific collection based on role
-                String roleCollection = user.getRole() == UserRole.STUDENT ? "students" :
-                        user.getRole() == UserRole.FACULTY ? "faculty" : null;
+        // First delete from Firestore
+        String roleCollection = user.getRole() == UserRole.STUDENT ? "students"
+                : user.getRole() == UserRole.FACULTY ? "faculty" : null;
 
-                if (roleCollection != null) {
-                    db.collection(roleCollection).document(user.getUserId()).delete();
-                }
+        // Create a batch operation
+        WriteBatch batch = db.batch();
 
-                // Delete from users collection
-                db.collection("users")
-                        .document(user.getUserId())
-                        .delete()
-                        .addOnSuccessListener(aVoid -> {
-                            users.remove(user);
-                            userAdapter.notifyDataSetChanged();
-                            binding.progressBar.setVisibility(View.GONE);
-                            showToast("User deleted successfully");
-                        })
-                        .addOnFailureListener(e -> {
-                            binding.progressBar.setVisibility(View.GONE);
-                            showToast("Failed to delete user from database");
-                        });
-            } else {
-                binding.progressBar.setVisibility(View.GONE);
-                showToast("Failed to delete user authentication");
-            }
-        });
+        // Add role-specific delete
+        if (roleCollection != null) {
+            batch.delete(db.collection(roleCollection).document(user.getUserId()));
+        }
+
+        // Add user delete
+        batch.delete(db.collection("users").document(user.getUserId()));
+
+        // Execute batch
+        batch.commit()
+                .addOnSuccessListener(aVoid -> {
+                    users.remove(user);
+                    userAdapter.notifyDataSetChanged();
+                    binding.progressBar.setVisibility(View.GONE);
+                    showToast("User deleted successfully");
+                })
+                .addOnFailureListener(e -> {
+                    binding.progressBar.setVisibility(View.GONE);
+                    showToast("Failed to delete user: " + e.getMessage());
+                });
     }
+
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

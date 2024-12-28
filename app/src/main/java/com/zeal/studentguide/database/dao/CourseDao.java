@@ -17,7 +17,6 @@ public interface CourseDao {
     @Delete
     void delete(Course course);
 
-
     @Query("SELECT * FROM courses WHERE isActive = 1 ORDER BY courseName ASC")
     LiveData<List<Course>> getAllCourses();
 
@@ -38,4 +37,7 @@ public interface CourseDao {
 
     @Query("SELECT * FROM courses WHERE facultyId = :facultyId AND isActive = 1")
     LiveData<List<Course>> getCoursesByFaculty(String facultyId);
+
+    @Query("SELECT * FROM courses")
+    List<Course> getAllCoursesSync();
 }

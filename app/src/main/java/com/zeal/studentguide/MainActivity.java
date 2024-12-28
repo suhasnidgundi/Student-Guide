@@ -7,6 +7,7 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.FirebaseApp;
 import com.zeal.studentguide.activities.AdminDashboardActivity;
 import com.zeal.studentguide.activities.FacultyDashboardActivity;
@@ -22,6 +23,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        try {
+            GoogleApiAvailability.getInstance().makeGooglePlayServicesAvailable(this);
+        } catch (Exception e) {
+            Log.e("Application", "Error initializing Google Play Services: " + e.getMessage());
+        }
         FirebaseApp.initializeApp(this);
         mainActivityBinding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(mainActivityBinding.getRoot());

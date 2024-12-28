@@ -1,6 +1,8 @@
 package com.zeal.studentguide.activities;
 
+import android.content.DialogInterface;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -9,6 +11,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.DividerItemDecoration;
 import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.google.android.material.snackbar.Snackbar;
@@ -34,19 +37,48 @@ public class CourseManagementActivity extends AppCompatActivity {
         binding = ActivityCourseManagementBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        // Show loading state
+        binding.progressBar.setVisibility(View.VISIBLE);
+
+        // Initialize ViewModel
         courseViewModel = new ViewModelProvider(this).get(CourseViewModel.class);
+
+        // Setup RecyclerView first
         setupRecyclerView();
-        setupClickListeners();
-        observeCourses();
+
+        // Then observe data changes
+        observeViewModel();
     }
 
     private void setupRecyclerView() {
-        courseAdapter = new CourseAdapter(
-                course -> showCourseDialog(course, true),
-                this::confirmDeleteCourse
-        );
-        binding.recyclerViewCourses.setLayoutManager(new LinearLayoutManager(this));
-        binding.recyclerViewCourses.setAdapter(courseAdapter);
+        try {
+            // Initialize adapter with empty list
+            courseAdapter = new CourseAdapter(
+                    course -> {
+                        if (course != null && !isFinishing()) {
+                            showCourseDialog(course, true);
+                        }
+                    },
+                    course -> {
+                        if (course != null && !isFinishing()) {
+                            confirmDeleteCourse(course);
+                        }
+                    }
+            );
+
+            // Setup layout manager and adapter
+            binding.recyclerViewCourses.setLayoutManager(new LinearLayoutManager(this));
+            binding.recyclerViewCourses.setAdapter(courseAdapter);
+
+            // Add item decoration if needed
+            binding.recyclerViewCourses.addItemDecoration(
+                    new DividerItemDecoration(this, DividerItemDecoration.VERTICAL)
+            );
+
+        } catch (Exception e) {
+            Log.e("CourseManagement", "Error in setupRecyclerView: " + e.getMessage());
+            showErrorSnackbar("Failed to setup course list");
+        }
     }
 
     private void setupClickListeners() {
@@ -63,126 +95,127 @@ public class CourseManagementActivity extends AppCompatActivity {
     }
 
     private void showCourseDialog(Course course, boolean isEdit) {
-    View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_course, null);
-    MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
+        View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_course, null);
+        MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
 
-    TextInputEditText editCourseName = dialogView.findViewById(R.id.editCourseName);
-    TextInputEditText editCourseCode = dialogView.findViewById(R.id.editCourseCode);
-    TextInputEditText editCredits = dialogView.findViewById(R.id.editCredits);
-    TextInputEditText editDescription = dialogView.findViewById(R.id.editDescription);
-    TextInputEditText editSemester = dialogView.findViewById(R.id.editSemester);
-    
-    Spinner facultySpinner = dialogView.findViewById(R.id.spinnerFaculty);
-    ArrayList<Faculty> facultyList = new ArrayList<>();
-    
-    // Add a placeholder faculty for empty state
-    Faculty placeholderFaculty = new Faculty("", "No faculty available", "");
-    facultyList.add(placeholderFaculty);
-    
-    ArrayAdapter<Faculty> facultyAdapter = new ArrayAdapter<Faculty>(this,
-            android.R.layout.simple_spinner_item, facultyList) {
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            View view = super.getView(position, convertView, parent);
-            Faculty faculty = getItem(position);
-            TextView textView = view.findViewById(android.R.id.text1);
-            if (faculty != null && !faculty.getFacultyId().isEmpty()) {
-                textView.setText(faculty.getDesignation() + " - " + faculty.getDepartment());
-            } else {
-                textView.setText("No faculty available");
+        TextInputEditText editCourseName = dialogView.findViewById(R.id.editCourseName);
+        TextInputEditText editCourseCode = dialogView.findViewById(R.id.editCourseCode);
+        TextInputEditText editCredits = dialogView.findViewById(R.id.editCredits);
+        TextInputEditText editDescription = dialogView.findViewById(R.id.editDescription);
+        TextInputEditText editSemester = dialogView.findViewById(R.id.editSemester);
+
+        Spinner facultySpinner = dialogView.findViewById(R.id.spinnerFaculty);
+        ArrayList<Faculty> facultyList = new ArrayList<>();
+
+        // Add a placeholder faculty for empty state
+        Faculty placeholderFaculty = new Faculty("", "No faculty available", "");
+        facultyList.add(placeholderFaculty);
+
+        ArrayAdapter<Faculty> facultyAdapter = new ArrayAdapter<Faculty>(this,
+                android.R.layout.simple_spinner_item, facultyList) {
+            @Override
+            public View getView(int position, View convertView, ViewGroup parent) {
+                View view = super.getView(position, convertView, parent);
+                Faculty faculty = getItem(position);
+                TextView textView = view.findViewById(android.R.id.text1);
+                if (faculty != null && !faculty.getFacultyId().isEmpty()) {
+                    String displayText = faculty.getDesignation();
+                    if (displayText == null || displayText.isEmpty()) {
+                        displayText = "Faculty";
+                    }
+                    textView.setText(displayText);
+                } else {
+                    textView.setText("No faculty available");
+                }
+                return view;
             }
-            return view;
-        }
 
-        @Override
-        public View getDropDownView(int position, View convertView, ViewGroup parent) {
-            View view = super.getDropDownView(position, convertView, parent);
-            Faculty faculty = getItem(position);
-            TextView textView = view.findViewById(android.R.id.text1);
-            if (faculty != null && !faculty.getFacultyId().isEmpty()) {
-                textView.setText(faculty.getDesignation() + " - " + faculty.getDepartment());
-            } else {
-                textView.setText("No faculty available");
+            @Override
+            public View getDropDownView(int position, View convertView, ViewGroup parent) {
+                return getView(position, convertView, parent);
             }
-            return view;
-        }
-    };
+        };
 
-    facultyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-    facultySpinner.setAdapter(facultyAdapter);
+        facultyAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        facultySpinner.setAdapter(facultyAdapter);
 
-    courseViewModel.getAllFaculty().observe(this, facultyMembers -> {
-        facultyList.clear();
-        facultyList.add(placeholderFaculty); // Always keep placeholder
-        
-        if (facultyMembers != null && !facultyMembers.isEmpty()) {
-            facultyList.addAll(facultyMembers);
-        }
-        facultyAdapter.notifyDataSetChanged();
-        
-        if (isEdit && course != null) {
-            int position = 0; // Default to placeholder
-            for (int i = 0; i < facultyList.size(); i++) {
-                if (facultyList.get(i).getFacultyId().equals(course.getFacultyId())) {
-                    position = i;
-                    break;
+        // Observe faculty list
+        courseViewModel.getAllFaculty().observe(this, facultyMembers -> {
+            facultyList.clear();
+            if (facultyMembers == null || facultyMembers.isEmpty()) {
+                // Show message if no faculty available
+                facultyList.add(placeholderFaculty);
+                // Disable the positive button if it exists
+                if (builder.create().getButton(DialogInterface.BUTTON_POSITIVE) != null) {
+                    builder.create().getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
+                }
+                showToast("Please add faculty members before creating courses");
+            } else {
+                facultyList.addAll(facultyMembers);
+                // Enable the positive button if it exists
+                if (builder.create().getButton(DialogInterface.BUTTON_POSITIVE) != null) {
+                    builder.create().getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
                 }
             }
-            facultySpinner.setSelection(position);
-        }
-    });
+            facultyAdapter.notifyDataSetChanged();
 
-    // Set existing values for edit
-    if (isEdit && course != null) {
-        editCourseName.setText(course.getCourseName());
-        editCourseCode.setText(course.getCourseCode());
-        editCredits.setText(String.valueOf(course.getCredits()));
-        editDescription.setText(course.getDescription());
-        editSemester.setText(course.getSemester());
-    }
-
-    builder.setView(dialogView)
-            .setTitle(isEdit ? "Edit Course" : "Add New Course")
-            .setPositiveButton(isEdit ? "Update" : "Add", (dialog, which) -> {
-                String courseName = editCourseName.getText().toString();
-                String courseCode = editCourseCode.getText().toString();
-                String creditsStr = editCredits.getText().toString();
-                String description = editDescription.getText().toString();
-                String semester = editSemester.getText().toString();
-                
-                Faculty selectedFaculty = (Faculty) facultySpinner.getSelectedItem();
-                if (selectedFaculty == null || selectedFaculty.getFacultyId().isEmpty()) {
-                    Toast.makeText(this, "Please select a valid faculty", Toast.LENGTH_SHORT).show();
-                    return;
-                }
-
-                if (validateInput(courseName, courseCode, creditsStr)) {
-                    int credits = Integer.parseInt(creditsStr);
-                    if (isEdit) {
-                        course.setCourseName(courseName);
-                        course.setCourseCode(courseCode);
-                        course.setCredits(credits);
-                        course.setDescription(description);
-                        course.setSemester(semester);
-                        course.setFacultyId(selectedFaculty.getFacultyId());
-                        courseViewModel.updateCourse(course);
-                    } else {
-                        Course newCourse = new Course(
-                                UUID.randomUUID().toString(),
-                                courseName,
-                                courseCode,
-                                credits,
-                                selectedFaculty.getFacultyId()
-                        );
-                        newCourse.setDescription(description);
-                        newCourse.setSemester(semester);
-                        courseViewModel.insertCourse(newCourse);
+            if (isEdit && course != null) {
+                int position = 0;
+                for (int i = 0; i < facultyList.size(); i++) {
+                    if (facultyList.get(i).getFacultyId().equals(course.getFacultyId())) {
+                        position = i;
+                        break;
                     }
                 }
-            })
-            .setNegativeButton("Cancel", null)
-            .show();
-}
+                facultySpinner.setSelection(position);
+            }
+        });
+
+        // Set up dialog buttons
+        builder.setView(dialogView)
+                .setTitle(isEdit ? "Edit Course" : "Add New Course")
+                .setPositiveButton(isEdit ? "Update" : "Add", (dialog, which) -> {
+                    // Validation will only proceed if actual faculty is selected
+                    Faculty selectedFaculty = (Faculty) facultySpinner.getSelectedItem();
+                    if (selectedFaculty == null || selectedFaculty.getFacultyId().isEmpty()) {
+                        showToast("Please select a valid faculty member");
+                        return;
+                    }
+
+                    // Rest of your existing course creation/update code
+                    String courseName = editCourseName.getText().toString();
+                    String courseCode = editCourseCode.getText().toString();
+                    String creditsStr = editCredits.getText().toString();
+                    String description = editDescription.getText().toString();
+                    String semester = editSemester.getText().toString();
+
+                    if (validateInput(courseName, courseCode, creditsStr)) {
+                        int credits = Integer.parseInt(creditsStr);
+                        if (isEdit && course != null) {
+                            course.setCourseName(courseName);
+                            course.setCourseCode(courseCode);
+                            course.setCredits(credits);
+                            course.setDescription(description);
+                            course.setSemester(semester);
+                            course.setFacultyId(selectedFaculty.getFacultyId());
+                            courseViewModel.updateCourse(course);
+                        } else {
+                            Course newCourse = new Course(
+                                    UUID.randomUUID().toString(),
+                                    courseName,
+                                    courseCode,
+                                    credits,
+                                    selectedFaculty.getFacultyId()
+                            );
+                            newCourse.setDescription(description);
+                            newCourse.setSemester(semester);
+                            courseViewModel.insertCourse(newCourse);
+                        }
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
+    }
 
     private boolean validateInput(String name, String code, String credits) {
         if (name.trim().isEmpty() || code.trim().isEmpty() || credits.trim().isEmpty()) {
@@ -209,25 +242,42 @@ public class CourseManagementActivity extends AppCompatActivity {
     }
 
     private void observeViewModel() {
+        // Observe courses
         courseViewModel.getAllCourses().observe(this, courses -> {
-            courseAdapter.submitList(courses);
-            binding.textNoCourses.setVisibility(courses.isEmpty() ? View.VISIBLE : View.GONE);
+            if (courses != null) {
+                courseAdapter.submitList(courses);
+                binding.textNoCourses.setVisibility(courses.isEmpty() ? View.VISIBLE : View.GONE);
+            }
         });
 
+        // Observe loading state
         courseViewModel.getIsLoading().observe(this, isLoading -> {
             binding.progressBar.setVisibility(isLoading ? View.VISIBLE : View.GONE);
         });
 
-        courseViewModel.getErrorMessage().observe(this, errorMessage -> {
-            if (errorMessage != null && !errorMessage.isEmpty()) {
-                showErrorSnackbar(errorMessage);
+        // Observe errors
+        courseViewModel.getErrorMessage().observe(this, error -> {
+            if (error != null && !error.isEmpty()) {
+                showErrorSnackbar(error);
             }
         });
     }
 
     private void showErrorSnackbar(String message) {
-        Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG)
-                .setAction("Retry", v -> courseViewModel.syncWithFirebase())
-                .show();
+        if (!isFinishing()) {
+            Snackbar.make(binding.getRoot(), message, Snackbar.LENGTH_LONG)
+                    .setAction("Retry", v -> courseViewModel.syncWithFirebase())
+                    .show();
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        binding = null;
+    }
+
+    private void showToast(String message) {
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }
 }

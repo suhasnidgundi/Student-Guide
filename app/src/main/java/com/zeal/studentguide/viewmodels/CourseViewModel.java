@@ -26,22 +26,42 @@ public class CourseViewModel extends AndroidViewModel {
     private MutableLiveData<Boolean> isLoading;
     private MutableLiveData<String> errorMessage;
 
+    private final MutableLiveData<List<Course>> coursesLiveData = new MutableLiveData<>();
+    private final MutableLiveData<List<Faculty>> facultyLiveData = new MutableLiveData<>();
+
     public CourseViewModel(Application application) {
         super(application);
         AppDatabase localDb = AppDatabase.getInstance(application);
         courseDao = localDb.courseDao();
         facultyDao = localDb.facultyDao();
         db = FirebaseFirestore.getInstance();
-        allCourses = courseDao.getAllCourses();
-        allFaculty = facultyDao.getAllFaculty();
         isLoading = new MutableLiveData<>(false);
         errorMessage = new MutableLiveData<>();
 
-        // Initial sync with Firebase
-        syncWithFirebase();
-        syncFacultyWithFirebase();
+        // Load data initially
+        loadInitialData();
     }
 
+    private void loadInitialData() {
+        isLoading.setValue(true);
+        try {
+            // Load local data first
+            new Thread(() -> {
+                List<Course> localCourses = courseDao.getAllCoursesSync(); // Need to add this method to CourseDao
+                coursesLiveData.postValue(localCourses);
+
+                List<Faculty> localFaculty = facultyDao.getAllFacultySync(); // Need to add this method to FacultyDao
+                facultyLiveData.postValue(localFaculty);
+
+                // Then sync with Firebase
+                syncWithFirebase();
+                syncFacultyWithFirebase();
+            }).start();
+        } catch (Exception e) {
+            errorMessage.postValue("Error loading data: " + e.getMessage());
+            isLoading.postValue(false);
+        }
+    }
     public void syncWithFirebase() {
         isLoading.setValue(true);
         db.collection(COURSES_COLLECTION)

@@ -1,6 +1,7 @@
 package com.zeal.studentguide.activities;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -9,13 +10,17 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import com.google.firebase.auth.FirebaseAuth;import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.WriteBatch;
 import com.zeal.studentguide.databinding.ActivityAddUserBinding;
 import com.zeal.studentguide.models.Faculty;import com.zeal.studentguide.models.Student;import com.zeal.studentguide.models.User;
 import com.zeal.studentguide.models.UserRole;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -66,7 +71,7 @@ public class AddUserActivity extends AppCompatActivity {
         binding.buttonAddUser.setOnClickListener(v -> validateAndAddUser());
     }
 
-   private void validateAndAddUser() {
+    private void validateAndAddUser() {
         String name = binding.editTextName.getText().toString().trim();
         String email = binding.editTextEmail.getText().toString().trim();
         String phone = binding.editTextPhone.getText().toString().trim();
@@ -83,69 +88,76 @@ public class AddUserActivity extends AppCompatActivity {
 
         // Create Authentication account
         auth.createUserWithEmailAndPassword(email, password)
-            .addOnCompleteListener(task -> {
-                if (task.isSuccessful()) {
-                    String userId = task.getResult().getUser().getUid();
-                    
-                    // Create User object
-                    User user = new User(userId, email, name, role);
-                    user.setPhoneNumber(phone);
-                    user.setActive(true);
-                    user.setRegistrationDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        String userId = task.getResult().getUser().getUid();
 
-                    // Save to users collection
-                    db.collection("users")
-                        .document(userId)
-                        .set(user)
-                        .addOnSuccessListener(aVoid -> {
-                            // Create role-specific document
-                            if (role == UserRole.STUDENT) {
-                                createStudentDocument(userId);
-                            } else if (role == UserRole.FACULTY) {
-                                createFacultyDocument(userId);
-                            }
+                        // Create User object
+                        User user = new User(userId, email, name, role);
+                        user.setPhoneNumber(phone);
+                        user.setActive(true);
+                        user.setRegistrationDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
 
-                            // Send password reset email
-                            auth.sendPasswordResetEmail(email)
-                                .addOnSuccessListener(unused -> {
-                                    showToast("User added successfully. Password reset email sent.");
-                                    finish();
+                        // Save to users collection
+                        db.collection("users")
+                                .document(userId)
+                                .set(user)
+                                .addOnSuccessListener(aVoid -> {
+                                    // Create role-specific document
+                                    if (role == UserRole.STUDENT) {
+                                        createStudentDocument(userId, name, email);
+                                    } else if (role == UserRole.FACULTY) {
+                                        createFacultyDocument(userId, name, email);
+                                    }
+
+                                    // Send password reset email
+                                    auth.sendPasswordResetEmail(email)
+                                            .addOnSuccessListener(unused -> {
+                                                showToast("User added successfully. Password reset email sent.");
+                                                finish();
+                                            })
+                                            .addOnFailureListener(e -> {
+                                                showToast("User added but failed to send reset email");
+                                                finish();
+                                            });
                                 })
                                 .addOnFailureListener(e -> {
-                                    showToast("User added but failed to send reset email");
-                                    finish();
+                                    binding.progressBar.setVisibility(View.GONE);
+                                    showToast("Failed to add user to database");
                                 });
-                        })
-                        .addOnFailureListener(e -> {
-                            binding.progressBar.setVisibility(View.GONE);
-                            showToast("Failed to add user to database");
-                        });
-                } else {
-                    binding.progressBar.setVisibility(View.GONE);
-                    showToast("Failed to create user authentication");
-                }
-            });
+                    } else {
+                        binding.progressBar.setVisibility(View.GONE);
+                        showToast("Failed to create user authentication");
+                    }
+                });
     }
 
-    private void createStudentDocument(String userId) {
+    private void createStudentDocument(String userId, String fullName, String email) {
         Student student = new Student(userId);
-        // Add default student fields if needed
-        
+        student.setFullName(fullName);
+        student.setEmail(email);
+        student.setAttendancePercentage(0.0);
+        student.setActiveBacklogCount(0);
+        student.setCgpa(0.0);
+
         db.collection("students")
-            .document(userId)
-            .set(student)
-            .addOnFailureListener(e -> 
-                showToast("Warning: Failed to create student profile"));
+                .document(userId)
+                .set(student)
+                .addOnFailureListener(e ->
+                        showToast("Warning: Failed to create student profile"));
     }
 
-    private void createFacultyDocument(String userId) {
-        Faculty faculty = new Faculty(userId, "", "");  // Add default department and designation
-        
+    private void createFacultyDocument(String userId, String name, String email) {
+        Faculty faculty = new Faculty(userId, "", "");  // Department and designation can be updated later
+        faculty.setQualifications("");
+        faculty.setExperienceYears(0);
+        faculty.setSpecialization("");
+
         db.collection("faculty")
-            .document(userId)
-            .set(faculty)
-            .addOnFailureListener(e -> 
-                showToast("Warning: Failed to create faculty profile"));
+                .document(userId)
+                .set(faculty)
+                .addOnFailureListener(e ->
+                        showToast("Warning: Failed to create faculty profile"));
     }
 
     private String generateTemporaryPassword() {
@@ -160,7 +172,6 @@ public class AddUserActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
     }

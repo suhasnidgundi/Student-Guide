@@ -16,16 +16,21 @@ import androidx.room.PrimaryKey;
         indices = {@Index("facultyId")})
 
 public class Faculty {
-    @PrimaryKey
-    @NonNull
-    private String facultyId; // This is also the userId from User table
     private String department;
     private String designation;
     private String specialization;
     private int experienceYears;
     private String qualifications;
+    @PrimaryKey
+    @NonNull
+    private String facultyId; // This is also the userId from User table
 
-    // Constructor
+    // Default constructor required for Firestore
+    public Faculty() {
+        this.facultyId = "";
+    }
+
+    // Parameterized constructor
     public Faculty(@NonNull String facultyId, String department, String designation) {
         this.facultyId = facultyId;
         this.department = department;
