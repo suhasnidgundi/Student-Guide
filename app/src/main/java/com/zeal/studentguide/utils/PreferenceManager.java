@@ -12,6 +12,8 @@ public class PreferenceManager {
     private static final String KEY_USERNAME = "username";
     private static final String KEY_USER_EMAIL = "userEmail";
 
+    private static final String KEY_USER_DEPARTMENT = "userDepartment";
+
     private SharedPreferences preferences;
 
     public PreferenceManager(Context context) {
@@ -62,5 +64,12 @@ public class PreferenceManager {
         preferences.edit().clear().apply();
     }
 
+    public void setUserDepartment(String department) {
+        preferences.edit().putString(KEY_USER_DEPARTMENT, department).apply();
+    }
+
+    public String getUserDepartment() {
+        return preferences.getString(KEY_USER_DEPARTMENT, "");
+    }
 
 }

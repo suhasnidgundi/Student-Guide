@@ -2,13 +2,16 @@ package com.zeal.studentguide.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.FirebaseFirestore;
 import com.zeal.studentguide.MainActivity;
 import com.zeal.studentguide.databinding.ActivityLoginBinding;
 import com.zeal.studentguide.models.User;
+import com.zeal.studentguide.models.UserRole;
 import com.zeal.studentguide.utils.FirebaseManager;
 import com.zeal.studentguide.utils.PreferenceManager;
 
@@ -16,6 +19,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityLoginBinding binding;
     private FirebaseManager firebaseManager;
     private PreferenceManager preferenceManager;
+    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +29,7 @@ public class LoginActivity extends AppCompatActivity {
 
         firebaseManager = FirebaseManager.getInstance();
         preferenceManager = new PreferenceManager(this);
+        db = FirebaseFirestore.getInstance();
 
         setupListeners();
     }
@@ -44,15 +49,22 @@ public class LoginActivity extends AppCompatActivity {
             firebaseManager.loginUser(email, password, new FirebaseManager.FirebaseCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
-                    hideLoading();
+                    // Save basic user information
                     preferenceManager.setLoggedIn(true);
                     preferenceManager.setUserId(user.getUserId());
                     preferenceManager.setUsername(user.getName());
                     preferenceManager.setUserEmail(user.getEmail());
                     preferenceManager.setUserRole(user.getRole());
 
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
+                    // Fetch additional role-specific information if needed
+                    if (user.getRole() == UserRole.STUDENT) {
+                        fetchStudentDepartment(user.getUserId());
+                    } else if (user.getRole() == UserRole.FACULTY) {
+                        fetchFacultyDepartment(user.getUserId());
+                    } else {
+                        // For admin or other roles, proceed directly to main activity
+                        proceedToMainActivity();
+                    }
                 }
 
                 @Override
@@ -64,8 +76,51 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         }
+    }
 
+    private void fetchStudentDepartment(String userId) {
+        db.collection("students")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists() && documentSnapshot.contains("branch")) {
+                        String department = documentSnapshot.getString("branch");
+                        preferenceManager.setUserDepartment(department);
+                    }
+                    proceedToMainActivity();
+                })
+                .addOnFailureListener(e -> {
+                    Log.e("LoginActivity", "Failed to fetch student details", e);
+                    Toast.makeText(LoginActivity.this,
+                            "Failed to fetch student details",
+                            Toast.LENGTH_SHORT).show();
+                    proceedToMainActivity();
+                });
+    }
+
+    private void fetchFacultyDepartment(String userId) {
+        db.collection("faculty")
+                .document(userId)
+                .get()
+                .addOnSuccessListener(documentSnapshot -> {
+                    if (documentSnapshot.exists() && documentSnapshot.contains("department")) {
+                        String department = documentSnapshot.getString("department");
+                        preferenceManager.setUserDepartment(department);
+                    }
+                    proceedToMainActivity();
+                })
+                .addOnFailureListener(e -> {
+                    Toast.makeText(LoginActivity.this,
+                            "Failed to fetch faculty details",
+                            Toast.LENGTH_SHORT).show();
+                    proceedToMainActivity();
+                });
+    }
+
+    private void proceedToMainActivity() {
         hideLoading();
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
+        finish();
     }
 
     private boolean validateInputs() {

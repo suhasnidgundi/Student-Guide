@@ -10,6 +10,9 @@ import com.zeal.studentguide.models.Faculty;
 import com.zeal.studentguide.models.User;
 import com.zeal.studentguide.models.UserRole;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 import java.util.Objects;
 
 public class FirebaseManager {
@@ -31,14 +34,16 @@ public class FirebaseManager {
         return instance;
     }
 
-    public void registerUser(String name, String email, String password, UserRole role, FirebaseCallback<User> callback) {
+    public void registerUser(String name, String email, String phonenumber, String password, UserRole role, FirebaseCallback<User> callback) {
         auth.createUserWithEmailAndPassword(email, password)
                 .addOnSuccessListener(authResult -> {
                     String uid = authResult.getUser().getUid();
 
                     // Create base user record first
                     User user = new User(uid, email, name, role);
-                    user.setActive(true);
+                    user.setPhoneNumber(phonenumber);
+                    user.setActive(false);
+                    user.setRegistrationDate(new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault()).format(new Date()));
 
                     // Save the base user record
                     db.collection("users")

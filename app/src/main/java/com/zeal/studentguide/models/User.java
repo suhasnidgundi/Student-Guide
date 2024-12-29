@@ -29,7 +29,7 @@ public class User {
         this.email = email;
         this.name = name;
         this.role = role;
-        this.isActive = true;
+        this.isActive = false;
     }
 
     public User() {

@@ -108,5 +108,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, VirtualCollegeTourActivity.class)));
         binding.cardAcademics.setOnClickListener(v ->
                 startActivity(new Intent(this, AcademicsActivity.class)));
+        binding.cardFaculties.setOnClickListener(v ->
+                startActivity(new Intent(this, FacultiesActivity.class)));
     }
 }

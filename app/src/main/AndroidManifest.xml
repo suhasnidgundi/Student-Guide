@@ -55,6 +55,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.EditAdminProfileActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize"/>
+
+        <activity
             android:name=".activities.EditProfileActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -66,6 +71,16 @@
 
         <activity
             android:name=".activities.FacultyDashboardActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.FacultiesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.FacultyDetailActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

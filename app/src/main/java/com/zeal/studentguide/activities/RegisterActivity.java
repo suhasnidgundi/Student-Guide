@@ -50,10 +50,11 @@ public class RegisterActivity extends AppCompatActivity {
             showLoading();
             String name = binding.editTextName.getText().toString();
             String email = binding.editTextEmail.getText().toString().trim();
+            String phonenumber = binding.editTextPhone.getText().toString();
             String password = binding.editTextPassword.getText().toString().trim();
             String role = binding.spinnerRole.getSelectedItem().toString().trim();
 
-            firebaseManager.registerUser(name, email, password, UserRole.valueOf(role), new FirebaseManager.FirebaseCallback<User>() {
+            firebaseManager.registerUser(name, email, phonenumber, password, UserRole.valueOf(role), new FirebaseManager.FirebaseCallback<User>() {
                 @Override
                 public void onSuccess(User user) {
                     hideLoading();

@@ -106,10 +106,10 @@
 
                 <com.google.android.material.card.MaterialCardView
                     style="@style/DashboardCard"
-                    android:id="@+id/cardFacilities">
+                    android:id="@+id/cardFaculties">
                     <TextView
                         style="@style/DashboardCardText"
-                        android:text="FACILITIES" />
+                        android:text="FACULTIES" />
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.card.MaterialCardView
