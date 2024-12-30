@@ -58,6 +58,7 @@ public class Student {
     // Default constructor required for Firestore
     public Student() {
         this.studentId = "";
+        this.currentYear = "";
     }
 
     // Getters and Setters

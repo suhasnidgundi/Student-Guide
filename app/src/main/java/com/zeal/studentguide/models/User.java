@@ -22,6 +22,7 @@ public class User {
     private String lastLoginDate;
     private String registrationDate;
 
+    private boolean isProfileComplete;
 
     // Constructor
     public User(@NonNull String userId, String email, String name, UserRole role) {
@@ -34,7 +35,7 @@ public class User {
 
     public User() {
         // Default constructor required for Firestore
-        this.isActive = true;
+        this.isActive = false;
         this.userId = "";
         this.email = "";
         this.name = "";
@@ -90,5 +91,13 @@ public class User {
 
     public void setEmailVerified(boolean emailVerified) {
         isEmailVerified = emailVerified;
+    }
+
+    public boolean isProfileComplete() {
+        return isProfileComplete;
+    }
+
+    public void setProfileComplete(boolean profileComplete) {
+        isProfileComplete = profileComplete;
     }
 }

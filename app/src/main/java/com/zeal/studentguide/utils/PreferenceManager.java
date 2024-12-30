@@ -13,6 +13,8 @@ public class PreferenceManager {
     private static final String KEY_USER_EMAIL = "userEmail";
 
     private static final String KEY_USER_DEPARTMENT = "userDepartment";
+    private static final String KEY_USER_ACTIVE = "userActive";
+    private static final String KEY_USER_PROFILE_COMPLETE = "userProfileComplete";
 
     private SharedPreferences preferences;
 
@@ -71,5 +73,22 @@ public class PreferenceManager {
     public String getUserDepartment() {
         return preferences.getString(KEY_USER_DEPARTMENT, "");
     }
+
+    public void setUserActive(boolean isActive) {
+        preferences.edit().putBoolean(KEY_USER_ACTIVE, isActive).apply();
+    }
+
+    public boolean isUserActive() {
+        return preferences.getBoolean(KEY_USER_ACTIVE, false);
+    }
+
+    public void setUserProfileComplete(boolean isProfileComplete) {
+        preferences.edit().putBoolean(KEY_USER_PROFILE_COMPLETE, isProfileComplete).apply();
+    }
+
+    public boolean isUserProfileComplete() {
+        return preferences.getBoolean(KEY_USER_PROFILE_COMPLETE, false);
+    }
+
 
 }

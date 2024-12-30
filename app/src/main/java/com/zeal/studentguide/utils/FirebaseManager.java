@@ -73,6 +73,7 @@ public class FirebaseManager {
     Student student = new Student(user.getUserId());
     student.setEmail(user.getEmail());
     student.setFullName(user.getName());
+    student.setCurrentYear("");
 
     db.collection("students")
             .document(user.getUserId())
