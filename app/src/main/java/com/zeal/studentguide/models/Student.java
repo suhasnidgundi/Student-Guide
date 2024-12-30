@@ -28,7 +28,7 @@ public class Student {
     private String batch;
 
     @PropertyName("current_year")
-    private int currentYear;
+    private String currentYear;
 
     @PropertyName("profile_image_url")
     private String profileImageUrl;
@@ -91,9 +91,9 @@ public class Student {
 
 
     @PropertyName("current_year")
-    public int getCurrentYear() { return currentYear; }
+    public String getCurrentYear() { return currentYear; }
     @PropertyName("current_year")
-    public void setCurrentYear(int currentYear) { this.currentYear = currentYear; }
+    public void setCurrentYear(String currentYear) { this.currentYear = currentYear; }
 
     
     @PropertyName("profile_image_url")

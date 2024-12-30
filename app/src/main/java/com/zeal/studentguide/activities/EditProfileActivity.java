@@ -177,7 +177,7 @@ public class EditProfileActivity extends AppCompatActivity {
         currentStudent.setRollNumber(binding.inputRollNumber.getText().toString());
         currentStudent.setBranch(binding.inputDepartment.getText().toString()); // Changed from inputBranch
         currentStudent
-                .setCurrentYear(Integer.parseInt(((AutoCompleteTextView) binding.inputYear).getText().toString()));
+                .setCurrentYear(((AutoCompleteTextView) binding.inputYear).getText().toString());
         currentStudent.setSemester(((AutoCompleteTextView) binding.inputSemester).getText().toString());
 
         if (selectedImageUri != null) {
