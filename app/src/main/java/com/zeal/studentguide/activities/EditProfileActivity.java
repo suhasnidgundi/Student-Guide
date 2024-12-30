@@ -16,6 +16,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeal.studentguide.MainActivity;
 import com.zeal.studentguide.databinding.ActivityEditProfileBinding;
 import com.zeal.studentguide.models.Departments;
 import com.zeal.studentguide.models.Student;
@@ -218,6 +219,18 @@ public class EditProfileActivity extends AppCompatActivity {
                     binding.progressBar.setVisibility(View.GONE);
                     showToast("Failed to update profile");
                 });
+
+        database.collection("users")
+                .document(currentStudent.getStudentId())
+                .update("isProfileComplete", true)
+                .addOnSuccessListener(unused -> {
+                    preferenceManager.setUserProfileComplete(true);
+                    startActivity(new Intent(this, MainActivity.class));
+                    finish();
+                })
+                .addOnFailureListener(e -> {
+                    showToast("Failed to update profile status");
+                });
     }
 
     private boolean validateInput() {
@@ -251,5 +264,13 @@ public class EditProfileActivity extends AppCompatActivity {
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!preferenceManager.isUserProfileComplete()) {
+            return;
+        }
+        super.onBackPressed();
     }
 }

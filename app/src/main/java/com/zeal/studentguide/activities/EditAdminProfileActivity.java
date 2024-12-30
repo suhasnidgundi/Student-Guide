@@ -16,6 +16,7 @@ import com.bumptech.glide.Glide;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.zeal.studentguide.MainActivity;
 import com.zeal.studentguide.databinding.ActivityEditAdminProfileBinding;
 import com.zeal.studentguide.models.User;
 import com.zeal.studentguide.utils.PreferenceManager;
@@ -150,10 +151,22 @@ public class EditAdminProfileActivity extends AppCompatActivity {
                 .document(currentUserId)
                 .update(updates)
                 .addOnSuccessListener(aVoid -> {
-                    showLoading(false);
-                    preferenceManager.setUsername(name);
-                    showToast("Profile updated successfully");
-                    finish();
+                    // Update profile completion status
+                    db.collection("users")
+                            .document(currentUserId)
+                            .update("isProfileComplete", true)
+                            .addOnSuccessListener(unused -> {
+                                preferenceManager.setUserProfileComplete(true);
+                                showLoading(false);
+                                preferenceManager.setUsername(name);
+                                showToast("Profile updated successfully");
+                                startActivity(new Intent(this, MainActivity.class));
+                                finish();
+                            })
+                            .addOnFailureListener(e -> {
+                                showLoading(false);
+                                showToast("Failed to update profile status");
+                            });
                 })
                 .addOnFailureListener(e -> {
                     showLoading(false);
@@ -168,5 +181,13 @@ public class EditAdminProfileActivity extends AppCompatActivity {
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!preferenceManager.isUserProfileComplete()) {
+            return; // Prevent going back if profile is incomplete
+        }
+        super.onBackPressed();
     }
 }

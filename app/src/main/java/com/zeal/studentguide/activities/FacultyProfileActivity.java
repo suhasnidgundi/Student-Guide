@@ -10,6 +10,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.zeal.studentguide.MainActivity;
 import com.zeal.studentguide.R;
 import com.zeal.studentguide.databinding.ActivityFacultyProfileBinding;
 import com.zeal.studentguide.models.Departments;
@@ -32,7 +34,6 @@ public class FacultyProfileActivity extends AppCompatActivity {
         binding = ActivityFacultyProfileBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
-        // Initialize
         viewModel = new ViewModelProvider(this).get(FacultyViewModel.class);
         preferenceManager = new PreferenceManager(this);
         firebaseAuth = FirebaseAuth.getInstance();
@@ -87,7 +88,35 @@ public class FacultyProfileActivity extends AppCompatActivity {
         }
     }
 
+    private boolean validateInput() {
+        if (binding.editName.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please enter your name", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (binding.editDepartment.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please select your department", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (binding.editDesignation.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please enter your designation", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        if (binding.editExperience.getText().toString().trim().isEmpty()) {
+            Toast.makeText(this, "Please enter your years of experience", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+
+        return true;
+    }
+
     private void saveChanges() {
+        if (!validateInput()) {
+            return;
+        }
+
         String facultyId = preferenceManager.getUserId();
         if (facultyId == null || facultyId.isEmpty()) return;
 
@@ -108,7 +137,20 @@ public class FacultyProfileActivity extends AppCompatActivity {
 
         viewModel.updateFacultyProfile(updatedFaculty).observe(this, success -> {
             if (success) {
-                Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                // Update profile completion status
+                FirebaseFirestore.getInstance()
+                        .collection("users")
+                        .document(facultyId)
+                        .update("isProfileComplete", true)
+                        .addOnSuccessListener(unused -> {
+                            preferenceManager.setUserProfileComplete(true);
+                            Toast.makeText(this, "Profile updated successfully", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(this, MainActivity.class));
+                            finish();
+                        })
+                        .addOnFailureListener(e -> {
+                            Toast.makeText(this, "Failed to update profile status", Toast.LENGTH_SHORT).show();
+                        });
             } else {
                 Toast.makeText(this, "Failed to update profile", Toast.LENGTH_SHORT).show();
             }
@@ -128,5 +170,13 @@ public class FacultyProfileActivity extends AppCompatActivity {
                                     "Failed to send reset email: " + e.getMessage(),
                                     Toast.LENGTH_LONG).show());
         }
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (!preferenceManager.isUserProfileComplete()) {
+            return; // Prevent going back if profile is incomplete
+        }
+        super.onBackPressed();
     }
 }
