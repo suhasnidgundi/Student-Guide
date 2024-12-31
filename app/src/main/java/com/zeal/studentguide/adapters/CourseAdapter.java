@@ -69,7 +69,8 @@ public class CourseAdapter extends ListAdapter<Course, CourseAdapter.CourseViewH
             return oldItem.getCourseName().equals(newItem.getCourseName()) &&
                     oldItem.getCourseCode().equals(newItem.getCourseCode()) &&
                     oldItem.getCredits() == newItem.getCredits() &&
-                    oldItem.getSemester().equals(newItem.getSemester());
+                    (oldItem.getSemester() == null && newItem.getSemester() == null ||
+                            oldItem.getSemester() != null && oldItem.getSemester().equals(newItem.getSemester()));
         }
     }
 }

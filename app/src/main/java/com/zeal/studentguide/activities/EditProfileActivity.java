@@ -211,6 +211,7 @@ public class EditProfileActivity extends AppCompatActivity {
                 .document(currentStudent.getStudentId())
                 .set(currentStudent)
                 .addOnSuccessListener(aVoid -> {
+                    preferenceManager.setUserDepartment(currentStudent.getBranch());
                     binding.progressBar.setVisibility(View.GONE);
                     showToast("Profile updated successfully");
                     finish();

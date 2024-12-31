@@ -23,7 +23,7 @@ public interface CourseDao {
     @Query("SELECT * FROM courses WHERE courseId = :courseId")
     LiveData<Course> getCourseById(String courseId);
 
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    @Insert(onConflict = OnConflictStrategy.IGNORE)
     void insertCourse(Course course);
 
     @Update

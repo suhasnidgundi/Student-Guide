@@ -15,7 +15,7 @@
             android:layout_height="?attr/actionBarSize"
             android:background="?attr/colorPrimary"
             app:navigationIcon="@drawable/ic_back"
-            app:title="Academics"
+            app:title="Virtual Tour"
             app:titleTextColor="@color/white" />
 
     </com.google.android.material.appbar.AppBarLayout>

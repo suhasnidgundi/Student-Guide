@@ -26,6 +26,7 @@ public class FacultiesActivity extends AppCompatActivity {
         binding = ActivityFacultiesBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        setSupportActionBar(binding.toolbar);
         preferenceManager = new PreferenceManager(this);
         setupViewModel();
         setupRecyclerView();

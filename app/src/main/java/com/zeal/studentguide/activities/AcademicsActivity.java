@@ -88,17 +88,21 @@ public class AcademicsActivity extends AppCompatActivity {
     }
 
     private void loadCourses() {
-        database.collection("academics")
-                .document(studentProfile.getBranch())
-                .collection("semesters")
-                .document(studentProfile.getSemester())
-                .collection("courses")
+        if (studentProfile == null) {
+            showToast("Student profile not loaded");
+            return;
+        }
+
+        database.collection("courses")
+                .whereEqualTo("department", studentProfile.getBranch())
+                .whereEqualTo("semester", studentProfile.getSemester())
                 .get()
                 .addOnSuccessListener(queryDocumentSnapshots -> {
                     coursesList.clear();
                     for (DocumentSnapshot document : queryDocumentSnapshots) {
                         Course course = document.toObject(Course.class);
                         if (course != null) {
+                            course.setCourseId(document.getId()); // Ensure courseId is set
                             coursesList.add(course);
                         }
                     }
@@ -106,11 +110,17 @@ public class AcademicsActivity extends AppCompatActivity {
 
                     if (coursesList.isEmpty()) {
                         binding.textNoCourses.setVisibility(View.VISIBLE);
+                        binding.recyclerViewCourses.setVisibility(View.GONE);
                     } else {
                         binding.textNoCourses.setVisibility(View.GONE);
+                        binding.recyclerViewCourses.setVisibility(View.VISIBLE);
                     }
                 })
-                .addOnFailureListener(e -> showToast("Error loading courses"));
+                .addOnFailureListener(e -> {
+                    showToast("Error loading courses: " + e.getMessage());
+                    binding.textNoCourses.setVisibility(View.VISIBLE);
+                    binding.recyclerViewCourses.setVisibility(View.GONE);
+                });
     }
 
     private void loadAttendance() {
