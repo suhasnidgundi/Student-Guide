@@ -108,7 +108,22 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 startActivity(new Intent(this, VirtualCollegeTourActivity.class)));
         binding.cardAcademics.setOnClickListener(v ->
                 startActivity(new Intent(this, AcademicsActivity.class)));
-        binding.cardFaculties.setOnClickListener(v ->
-                startActivity(new Intent(this, FacultiesActivity.class)));
+
+        binding.navigationBot.setOnClickListener(v ->
+                startActivity(new Intent(this, CollegeGuideBotActivity.class)));
+
+        binding.cardFaculties.setOnClickListener(v -> {
+            String department = preferenceManager.getUserDepartment();
+            if (department == null || department.isEmpty()) {
+                Toast.makeText(this, "Please complete your profile with department information first",
+                        Toast.LENGTH_LONG).show();
+                // Optionally redirect to profile completion
+                startActivity(new Intent(this, EditProfileActivity.class));
+            } else {
+                Intent intent = new Intent(this, FacultiesActivity.class);
+                intent.putExtra("branch", department);
+                startActivity(intent);
+            }
+        });
     }
 }

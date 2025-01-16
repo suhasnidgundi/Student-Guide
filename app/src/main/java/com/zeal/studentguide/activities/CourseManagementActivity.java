@@ -7,6 +7,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.ProgressBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -25,14 +26,11 @@ import com.zeal.studentguide.adapters.CourseAdapter;
 import com.zeal.studentguide.databinding.ActivityCourseManagementBinding;
 import com.zeal.studentguide.models.Course;
 import com.zeal.studentguide.models.Departments;
-import com.zeal.studentguide.models.Faculty;
 import com.zeal.studentguide.models.FacultyWithUser;
 import com.zeal.studentguide.viewmodels.CourseViewModel;
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -51,6 +49,7 @@ public class CourseManagementActivity extends AppCompatActivity {
 
             // Initialize ViewModel
             courseViewModel = new ViewModelProvider(this).get(CourseViewModel.class);
+            courseViewModel.syncWithFirebase();
 
             // Setup RecyclerView first
             setupRecyclerView();
@@ -88,11 +87,6 @@ public class CourseManagementActivity extends AppCompatActivity {
         }
     }
 
-    private void setupClickListeners() {
-        binding.fabAddCourse.setOnClickListener(v -> showCourseDialog(null, false));
-        binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
-    }
-
     private void showCourseDialog(Course course, boolean isEdit) {
         View dialogView = getLayoutInflater().inflate(R.layout.dialog_add_edit_course, null);
         MaterialAlertDialogBuilder builder = new MaterialAlertDialogBuilder(this);
@@ -106,34 +100,28 @@ public class CourseManagementActivity extends AppCompatActivity {
         Spinner facultySpinner = dialogView.findViewById(R.id.spinnerFaculty);
         Spinner departmentSpinner = dialogView.findViewById(R.id.spinnerDepartment);
 
-        // Create and set up dialog first
-        AlertDialog dialog = builder.setView(dialogView)
-                .setTitle(isEdit ? "Edit Course" : "Add New Course")
-                .setPositiveButton(isEdit ? "Update" : "Add", null) // Set to null initially
-                .setNegativeButton("Cancel", null)
-                .create();
-
+        // Set up faculty adapter with custom display
         ArrayAdapter<FacultyWithUser> facultyAdapter = new ArrayAdapter<FacultyWithUser>(this,
                 android.R.layout.simple_spinner_item) {
-
             @Override
             public View getView(int position, View convertView, ViewGroup parent) {
                 View view = super.getView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
                 FacultyWithUser faculty = getItem(position);
-                TextView textView = view.findViewById(android.R.id.text1);
-                textView.setText(faculty != null ? faculty.getName() : "Select Faculty");
+                if (faculty != null) {
+                    text.setText(faculty.getName() + " - " + faculty.getDepartment());
+                }
                 return view;
             }
 
             @Override
             public View getDropDownView(int position, View convertView, ViewGroup parent) {
                 View view = super.getDropDownView(position, convertView, parent);
+                TextView text = (TextView) view.findViewById(android.R.id.text1);
                 FacultyWithUser faculty = getItem(position);
-                TextView textView = view.findViewById(android.R.id.text1);
-                String displayText = faculty != null ?
-                        faculty.getName() + " - " + faculty.getDepartment() :
-                        "Select Faculty";
-                textView.setText(displayText);
+                if (faculty != null) {
+                    text.setText(faculty.getName() + " - " + faculty.getDepartment());
+                }
                 return view;
             }
         };
@@ -149,17 +137,74 @@ public class CourseManagementActivity extends AppCompatActivity {
         departmentAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         departmentSpinner.setAdapter(departmentAdapter);
 
-        // Show dialog before loading data
+        // Create the dialog
+        AlertDialog dialog = builder.setView(dialogView)
+                .setTitle(isEdit ? "Edit Course" : "Add New Course")
+                .setPositiveButton(isEdit ? "Update" : "Add", null) // We'll override this later
+                .setNegativeButton("Cancel", null)
+                .create();
+
+        // Show dialog
         dialog.show();
 
         // Get the positive button after dialog is shown
         Button positiveButton = dialog.getButton(DialogInterface.BUTTON_POSITIVE);
-        positiveButton.setEnabled(false); // Disable until faculty data loads
+        positiveButton.setEnabled(false); // Initially disabled until faculty data loads
+
+        // Show loading indicator
+        ProgressBar progressBar = dialogView.findViewById(R.id.progressBar);
+        if (progressBar != null) {
+            progressBar.setVisibility(View.VISIBLE);
+            facultySpinner.setVisibility(View.GONE);
+        }
+
+        // Observe faculty data
+        courseViewModel.getAllFacultyWithUsers().observe(this, facultyMembers -> {
+            if (progressBar != null) {
+                progressBar.setVisibility(View.GONE);
+            }
+            facultySpinner.setVisibility(View.VISIBLE);
+
+            if (facultyMembers == null || facultyMembers.isEmpty()) {
+                showErrorDialog("No Faculty Available",
+                        "Please ensure there are active faculty members before creating courses.");
+                dialog.dismiss();
+                return;
+            }
+
+            facultyAdapter.clear();
+            facultyAdapter.addAll(facultyMembers);
+            positiveButton.setEnabled(true);
+
+            // Pre-select faculty if editing
+            if (isEdit && course != null) {
+                for (int i = 0; i < facultyMembers.size(); i++) {
+                    if (facultyMembers.get(i).getFacultyId().equals(course.getFacultyId())) {
+                        facultySpinner.setSelection(i);
+                        break;
+                    }
+                }
+                // Pre-fill other fields
+                editCourseName.setText(course.getCourseName());
+                editCourseCode.setText(course.getCourseCode());
+                editCredits.setText(String.valueOf(course.getCredits()));
+                editDescription.setText(course.getDescription());
+                editSemester.setText(course.getSemester());
+
+                // Pre-select department
+                String courseDepartment = course.getDepartment();
+                for (int i = 0; i < departmentAdapter.getCount(); i++) {
+                    if (departmentAdapter.getItem(i).equals(courseDepartment)) {
+                        departmentSpinner.setSelection(i);
+                        break;
+                    }
+                }
+            }
+        });
 
         // Set click listener for positive button
         positiveButton.setOnClickListener(v -> {
             FacultyWithUser selectedFaculty = (FacultyWithUser) facultySpinner.getSelectedItem();
-
             if (selectedFaculty == null) {
                 showToast("Please select a faculty member");
                 return;
@@ -192,38 +237,11 @@ public class CourseManagementActivity extends AppCompatActivity {
                             selectedFaculty.getFacultyId(),
                             selectedDepartment
                     );
-
-                    newCourse.setDepartment(selectedDepartment);
                     newCourse.setDescription(description);
                     newCourse.setSemester(semester);
                     courseViewModel.insertCourse(newCourse);
                 }
-
-                Toast.makeText(this, "Selected Department : " + selectedDepartment, Toast.LENGTH_SHORT).show();
-                Toast.makeText(this, "Selected Faculty : " + selectedFaculty.getName(), Toast.LENGTH_SHORT).show();
                 dialog.dismiss();
-            }
-        });
-
-        // Observe faculty data
-        courseViewModel.getAllFacultyWithUsers().observe(this, facultyMembers -> {
-            if (facultyMembers == null || facultyMembers.isEmpty()) {
-                positiveButton.setEnabled(false);
-                showToast("Please add faculty members before creating courses");
-                return;
-            }
-
-            facultyAdapter.clear();
-            facultyAdapter.addAll(facultyMembers);
-            positiveButton.setEnabled(true);
-
-            if (isEdit && course != null) {
-                for (int i = 0; i < facultyMembers.size(); i++) {
-                    if (facultyMembers.get(i).getFacultyId().equals(course.getFacultyId())) {
-                        facultySpinner.setSelection(i);
-                        break;
-                    }
-                }
             }
         });
     }
@@ -298,6 +316,17 @@ public class CourseManagementActivity extends AppCompatActivity {
 
     private void showToast(String message) {
         Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showErrorDialog(String title, String message) {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle(title)
+                .setMessage(message)
+                .setPositiveButton("Retry", (dialog, which) -> {
+                    courseViewModel.syncWithFirebase();
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
 }

@@ -59,6 +59,13 @@
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp" />
 
+            <LinearLayout
+                android:id="@+id/containerMaterials"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:orientation="vertical" />
+
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/recyclerViewContent"
                 android:layout_width="match_parent"

@@ -100,15 +100,25 @@ public class FirebaseManager {
                             .document(userId)
                             .get()
                             .addOnSuccessListener(document -> {
-                                User user = document.toObject(User.class);
-                                if (user != null) {
-                                    callback.onSuccess(user);
-                                } else {
-                                    callback.onError(new Exception("User data not found"));
-                                }
+                                // Update the lastLoginDate before converting to User object
+                                String currentDate = new SimpleDateFormat("yyyy-MM-dd", Locale.getDefault())
+                                        .format(new Date());
+
+                                // First update the lastLoginDate in Firestore
+                                document.getReference().update("lastLoginDate", currentDate)
+                                        .addOnSuccessListener(aVoid -> {
+                                            // Now get the updated document with the string date
+                                            User user = document.toObject(User.class);
+                                            if (user != null) {
+                                                user.setLastLoginDate(currentDate); // Set the formatted date string
+                                                callback.onSuccess(user);
+                                            } else {
+                                                callback.onError(new Exception("User data not found"));
+                                            }
+                                        })
+                                        .addOnFailureListener(callback::onError);
                             })
                             .addOnFailureListener(callback::onError);
-
                 })
                 .addOnFailureListener(callback::onError);
     }

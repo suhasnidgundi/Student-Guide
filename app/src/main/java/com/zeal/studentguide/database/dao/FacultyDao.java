@@ -2,6 +2,8 @@ package com.zeal.studentguide.database.dao;
 
 import androidx.lifecycle.LiveData;import androidx.room.*;
 import com.zeal.studentguide.models.Faculty;
+import com.zeal.studentguide.models.FacultyWithUser;
+
 import java.util.List;
 
 @Dao
@@ -26,5 +28,9 @@ public interface FacultyDao {
 
     @Query("SELECT * FROM faculty WHERE facultyId = :facultyId")
     Faculty getFacultyById(String facultyId);
+
+    @Transaction
+    @Query("SELECT * FROM faculty")
+    LiveData<List<FacultyWithUser>> getAllFacultyWithUsers();
 
 }

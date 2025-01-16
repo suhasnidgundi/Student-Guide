@@ -125,7 +125,25 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottom_navigation"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="65dp"
         android:layout_gravity="bottom"
-        app:menu="@menu/bottom_nav_menu" />
+        android:background="@color/colorAccent"
+        app:itemIconTint="@android:color/white"
+        app:itemTextColor="@android:color/white"
+        />
+
+    <!-- Add FAB on top of BottomNavigationView -->
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/navigation_bot"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center"
+        android:layout_marginBottom="28dp"
+        android:backgroundTint="@color/colorAccent"
+        android:src="@drawable/ic_bot"
+        app:borderWidth="5dp"
+        app:fabCustomSize="80dp"
+        app:maxImageSize="40dp"
+        app:fabSize="auto"
+        app:tint="@color/white" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

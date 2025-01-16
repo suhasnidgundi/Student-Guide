@@ -79,13 +79,13 @@ public class FacultyDashboardActivity extends AppCompatActivity {
     }
     private void setupClickListeners() {
         // Your existing click listeners for other dashboard items
-//        binding.cardMyCourses.setOnClickListener(v ->
-//                startActivity(new Intent(this, MyCoursesActivity.class)));
+        binding.cardMyCourses.setOnClickListener(v ->
+                startActivity(new Intent(this, FacultyCoursesActivity.class)));
 //        binding.cardAttendance.setOnClickListener(v ->
 //                startActivity(new Intent(this, AttendanceActivity.class)));
 //        binding.cardAssignments.setOnClickListener(v ->
 //                startActivity(new Intent(this, AssignmentsActivity.class)));
-//        binding.cardSchedule.setOnClickListener(v ->
-//                startActivity(new Intent(this, ScheduleActivity.class)));
+        binding.cardSchedule.setOnClickListener(v ->
+                startActivity(new Intent(this, AddCourseMaterialActivity.class)));
     }
 }

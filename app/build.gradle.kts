@@ -81,6 +81,14 @@ dependencies {
 
     implementation("com.github.bumptech.glide:glide:4.12.0")
     annotationProcessor("com.github.bumptech.glide:compiler:4.12.0")
+
+    // LLM Inference API
+    implementation("com.google.mediapipe:tasks-genai:latest.release");
+
+    // ReactiveX for Async operations
+    implementation("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+
 }
 
 configurations.all {
