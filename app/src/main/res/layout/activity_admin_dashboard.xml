@@ -90,10 +90,10 @@
 
             <com.google.android.material.card.MaterialCardView
                 style="@style/DashboardCard"
-                android:id="@+id/cardReports">
+                android:id="@+id/cardVirtualTourManagement">
                 <TextView
                     style="@style/DashboardCardText"
-                    android:text="REPORTS" />
+                    android:text="Virtual Tour Management" />
             </com.google.android.material.card.MaterialCardView>
         </GridLayout>
     </androidx.core.widget.NestedScrollView>

@@ -131,7 +131,13 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
-        <activity android:name=".activities.VirtualCollegeTourActivity"
+        <activity
+            android:name=".activities.VirtualCollegeTourActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.VirtualTourManagementActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
