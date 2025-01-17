@@ -30,4 +30,7 @@ public interface CourseDao {
 
     @Query("SELECT * FROM courses WHERE isActive = 1")
     List<Course> getAllCoursesSync();
+
+    @Query("SELECT * FROM courses WHERE facultyId = :facultyId AND isActive = 1")
+    List<Course> getCoursesByFacultySync(String facultyId);
 }

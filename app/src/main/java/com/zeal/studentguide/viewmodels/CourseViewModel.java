@@ -233,24 +233,31 @@ public class CourseViewModel extends AndroidViewModel {
                             for (DocumentSnapshot doc : userSnapshot.getDocuments()) {
                                 User user = doc.toObject(User.class);
                                 if (user != null) {
-                                    // Insert/update user first
-                                    userDao.insert(user);
+                                    try {
+                                        // Insert/update user with conflict resolution
+                                        userDao.insert(user);
 
-                                    // Get and insert faculty data
-                                    Task<DocumentSnapshot> facultyTask = db.collection(FACULTY_COLLECTION)
-                                            .document(user.getUserId())
-                                            .get();
+                                        // Get and insert faculty data
+                                        Task<DocumentSnapshot> facultyTask = db.collection(FACULTY_COLLECTION)
+                                                .document(user.getUserId())
+                                                .get();
 
-                                    // Wait for faculty data
-                                    while (!facultyTask.isComplete()) {
-                                        Thread.sleep(100);
-                                    }
-
-                                    if (facultyTask.isSuccessful() && facultyTask.getResult() != null) {
-                                        Faculty faculty = facultyTask.getResult().toObject(Faculty.class);
-                                        if (faculty != null) {
-                                            facultyDao.insert(faculty);
+                                        // Wait for faculty data
+                                        while (!facultyTask.isComplete()) {
+                                            Thread.sleep(100);
                                         }
+
+                                        if (facultyTask.isSuccessful() && facultyTask.getResult() != null) {
+                                            Faculty faculty = facultyTask.getResult().toObject(Faculty.class);
+                                            if (faculty != null) {
+                                                // Insert with conflict resolution strategy
+                                                facultyDao.insert(faculty);
+                                            }
+                                        }
+                                    } catch (Exception e) {
+                                        Log.e(TAG, "Error processing faculty member: " + e.getMessage());
+                                        // Continue with next faculty member instead of failing entire sync
+                                        continue;
                                     }
                                 }
                             }
@@ -264,7 +271,6 @@ public class CourseViewModel extends AndroidViewModel {
 
         return tcs.getTask();
     }
-
     public void insertCourse(Course course) {
         isLoading.setValue(true);
         clearErrorMessage();
@@ -331,13 +337,12 @@ public class CourseViewModel extends AndroidViewModel {
 
     public void deleteCourse(Course course) {
         isLoading.setValue(true);
-        course.setActive(false);
         db.collection(COURSES_COLLECTION)
                 .document(course.getCourseId())
-                .set(course)
+                .delete()  // Actually delete from Firestore
                 .addOnSuccessListener(aVoid -> {
                     executorService.execute(() -> {
-                        courseDao.deleteCourse(course);
+                        courseDao.deleteCourse(course);  // Actually delete from local DB
                         isLoading.postValue(false);
                     });
                 })
@@ -376,12 +381,21 @@ public class CourseViewModel extends AndroidViewModel {
     public LiveData<List<Course>> getCoursesByFaculty(String facultyId) {
         MutableLiveData<List<Course>> facultyCoursesLiveData = new MutableLiveData<>();
 
+        if (facultyId == null || facultyId.isEmpty()) {
+            setErrorOnMainThread("Invalid faculty ID");
+            facultyCoursesLiveData.postValue(new ArrayList<>());
+            return facultyCoursesLiveData;
+        }
+
+        setLoadingOnMainThread(true);
         executorService.execute(() -> {
             try {
                 // First try to get from local database
-                LiveData<List<Course>> localCourses = courseDao.getCoursesByFaculty(facultyId);
+                List<Course> localCourses = courseDao.getCoursesByFacultySync(facultyId);
+                // Post initial data from local DB
+                facultyCoursesLiveData.postValue(localCourses);
 
-                // Also fetch from Firebase to ensure data is up to date
+                // Then fetch from Firebase to ensure data is up to date
                 db.collection(COURSES_COLLECTION)
                         .whereEqualTo("faculty_id", facultyId)
                         .whereEqualTo("is_active", true)
@@ -389,31 +403,40 @@ public class CourseViewModel extends AndroidViewModel {
                         .addOnSuccessListener(querySnapshot -> {
                             List<Course> courses = new ArrayList<>();
                             for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                                Course course = doc.toObject(Course.class);
-                                if (course != null) {
-                                    courses.add(course);
+                                try {
+                                    Course course = doc.toObject(Course.class);
+                                    if (course != null) {
+                                        courses.add(course);
+                                    }
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error converting document to Course: " + e.getMessage());
                                 }
                             }
 
                             // Update local database
                             executorService.execute(() -> {
-                                for (Course course : courses) {
-                                    courseDao.insertCourse(course);
+                                try {
+                                    for (Course course : courses) {
+                                        courseDao.insertCourse(course);
+                                    }
+                                    // Post updated data
+                                    facultyCoursesLiveData.postValue(courses);
+                                } catch (Exception e) {
+                                    Log.e(TAG, "Error updating local database: " + e.getMessage());
                                 }
+                                setLoadingOnMainThread(false);
                             });
-
-                            facultyCoursesLiveData.postValue(courses);
                         })
                         .addOnFailureListener(e -> {
                             Log.e(TAG, "Error getting faculty courses: " + e.getMessage());
                             setErrorOnMainThread("Failed to load courses: " + e.getMessage());
-                            // If Firebase fails, use local data
-                            facultyCoursesLiveData.postValue(new ArrayList<>());
+                            setLoadingOnMainThread(false);
                         });
 
             } catch (Exception e) {
                 Log.e(TAG, "Error in getCoursesByFaculty: " + e.getMessage());
                 setErrorOnMainThread("Error loading courses: " + e.getMessage());
+                setLoadingOnMainThread(false);
                 facultyCoursesLiveData.postValue(new ArrayList<>());
             }
         });

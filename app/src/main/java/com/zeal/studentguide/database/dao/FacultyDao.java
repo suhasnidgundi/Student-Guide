@@ -8,7 +8,7 @@ import java.util.List;
 
 @Dao
 public interface FacultyDao {
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     long insert(Faculty faculty);
 
     @Update
