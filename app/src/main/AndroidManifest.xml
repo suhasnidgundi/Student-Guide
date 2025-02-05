@@ -47,6 +47,16 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.AdmissionActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.AdmissionAdministrationDashboardActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".activities.CollegeGuideBotActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
@@ -107,12 +117,27 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.FinancialAidActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.InternshipOpportunitiesActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".activities.LoginActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
         <activity
             android:name=".activities.RegisterActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
+            android:name=".activities.ScholarshipApplicationActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 

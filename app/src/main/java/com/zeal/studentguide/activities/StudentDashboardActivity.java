@@ -112,6 +112,9 @@ public class StudentDashboardActivity extends AppCompatActivity {
         binding.navigationBot.setOnClickListener(v ->
                 startActivity(new Intent(this, CollegeGuideBotActivity.class)));
 
+        binding.cardAdmission.setOnClickListener(v ->
+                startActivity(new Intent(this, AdmissionAdministrationDashboardActivity.class)));
+
         binding.cardFaculties.setOnClickListener(v -> {
             String department = preferenceManager.getUserDepartment();
             if (department == null || department.isEmpty()) {

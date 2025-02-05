@@ -51,7 +51,7 @@ dependencies {
     androidTestImplementation(libs.espresso.core)
 
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.7.0"))
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
     implementation("com.google.firebase:firebase-analytics")
     implementation("com.google.firebase:firebase-auth")
     implementation("com.google.firebase:firebase-firestore")
@@ -88,6 +88,20 @@ dependencies {
     // ReactiveX for Async operations
     implementation("io.reactivex.rxjava3:rxjava:3.1.5")
     implementation("io.reactivex.rxjava3:rxandroid:3.0.2")
+
+    implementation("de.hdodenhof:circleimageview:3.1.0")
+
+    // Add the dependency for the Vertex AI in Firebase library
+    // When using the BoM, you don't specify versions in Firebase library dependencies
+    implementation("com.google.firebase:firebase-vertexai")
+
+    // Required for one-shot operations (to use `ListenableFuture` from Guava Android)
+    implementation("com.google.guava:guava:31.0.1-android")
+
+    // Required for streaming operations (to use `Publisher` from Reactive Streams)
+    implementation("org.reactivestreams:reactive-streams:1.0.4")
+
+    implementation("com.airbnb.android:lottie:6.6.2")
 
 }
 

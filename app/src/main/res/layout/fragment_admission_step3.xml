@@ -1,0 +1,25 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <TextView
+        android:id="@+id/txtDocumentUpload"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Required Documents"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/btnUploadMarksheet"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload Marksheet" />
+
+    <Button
+        android:id="@+id/btnUploadIDProof"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Upload ID Proof" />
+</LinearLayout>

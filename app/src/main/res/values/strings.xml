@@ -8,6 +8,10 @@
     <string name="welcome">Welcome to Student Guide</string>
     <string name="first_fragment_label">First Fragment Label</string>
     <string name="second_fragment_label">Second Fragment Label</string>
+    <string name="scholarship_type_prompt"></string>
+    <string name="aid_type_prompt" />
+    <string name="degree_type_prompt" />
+    <string name="industry_type_prompt" />
 
     <!-- Add array for user roles -->
     <string-array name="user_roles">

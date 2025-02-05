@@ -1,19 +1,29 @@
 package com.zeal.studentguide.activities;
 
+import android.content.Context;
+import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
-import com.zeal.studentguide.R;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.zeal.studentguide.adapters.ViewPagerAdapter;
 import com.zeal.studentguide.databinding.ActivityCollegeGuideBotBinding;
 
 public class CollegeGuideBotActivity extends AppCompatActivity {
-
+    private static final int PERMISSIONS_REQUEST_CODE = 100;
     private ActivityCollegeGuideBotBinding binding;
+
+    private static final String[] REQUIRED_PERMISSIONS = {
+
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,10 +33,14 @@ public class CollegeGuideBotActivity extends AppCompatActivity {
 
         setupUI();
         setupViewPager();
+        checkPermissions();
     }
 
     private void setupUI() {
         setSupportActionBar(binding.toolbar);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+        binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
     }
 
     private void setupViewPager() {
@@ -40,6 +54,60 @@ public class CollegeGuideBotActivity extends AppCompatActivity {
                 super.onPageSelected(position);
             }
         });
+    }
+
+    private void checkPermissions() {
+        if (!hasPermissions(this, REQUIRED_PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, REQUIRED_PERMISSIONS, PERMISSIONS_REQUEST_CODE);
+        }
+    }
+
+    private boolean hasPermissions(Context context, String... permissions) {
+        if (context != null && permissions != null) {
+            for (String permission : permissions) {
+                if (ActivityCompat.checkSelfPermission(context, permission)
+                        != PackageManager.PERMISSION_GRANTED) {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == PERMISSIONS_REQUEST_CODE) {
+            if (grantResults.length > 0) {
+                boolean allGranted = true;
+                for (int result : grantResults) {
+                    if (result != PackageManager.PERMISSION_GRANTED) {
+                        allGranted = false;
+                        break;
+                    }
+                }
+
+                if (!allGranted) {
+                    showPermissionExplanationDialog();
+                }
+            }
+        }
+    }
+
+    private void showPermissionExplanationDialog() {
+        new MaterialAlertDialogBuilder(this)
+                .setTitle("Permissions Required")
+                .setMessage("This app needs microphone permission to enable voice interactions. " +
+                        "Please grant the permissions in Settings to use all features.")
+                .setPositiveButton("Settings", (dialog, which) -> {
+                    Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                    Uri uri = Uri.fromParts("package", getPackageName(), null);
+                    intent.setData(uri);
+                    startActivity(intent);
+                })
+                .setNegativeButton("Cancel", null)
+                .show();
     }
 
     @Override

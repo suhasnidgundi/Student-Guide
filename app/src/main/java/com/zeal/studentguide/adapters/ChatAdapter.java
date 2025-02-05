@@ -12,6 +12,7 @@ import com.zeal.studentguide.R;
 import com.zeal.studentguide.models.ChatMessage;
 
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder> {
     private static final int VIEW_TYPE_USER = 1;
@@ -31,13 +32,18 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
 
         View view = LayoutInflater.from(parent.getContext())
                 .inflate(layoutRes, parent, false);
-        return new ChatViewHolder(view, viewType);
+        return new ChatViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ChatViewHolder holder, int position) {
         ChatMessage message = messages.get(position);
-        holder.bindMessage(message);
+        holder.messageText.setText(message.getMessage());
+
+        // Set timestamp
+        if (holder.timestamp != null) {
+            holder.timestamp.setText(message.getFormattedTime());
+        }
     }
 
     @Override
@@ -50,17 +56,20 @@ public class ChatAdapter extends RecyclerView.Adapter<ChatAdapter.ChatViewHolder
         return messages.size();
     }
 
+    public void updateMessages(List<ChatMessage> newMessages) {
+        messages.clear();
+        messages.addAll(newMessages);
+        notifyDataSetChanged();
+    }
+
     static class ChatViewHolder extends RecyclerView.ViewHolder {
         private final TextView messageText;
+        private final TextView timestamp;
 
-        ChatViewHolder(View itemView, int viewType) {
+        ChatViewHolder(View itemView) {
             super(itemView);
-            messageText = itemView.findViewById(viewType == VIEW_TYPE_USER ?
-                    R.id.messageTextUser : R.id.messageTextBot);
-        }
-
-        void bindMessage(ChatMessage message) {
-            messageText.setText(message.getMessage());
+            messageText = itemView.findViewById(R.id.messageText);
+            timestamp = itemView.findViewById(R.id.timestamp);
         }
     }
 }

@@ -12,6 +12,7 @@ navigationUi = "2.6.0"
 firebaseAnalytics = "22.1.2"
 firebaseFirestore = "25.1.1"
 firebaseAuth = "23.1.0"
+firebaseVertexai = "16.0.2"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
@@ -26,6 +27,7 @@ navigation-ui = { group = "androidx.navigation", name = "navigation-ui", version
 firebase-analytics = { group = "com.google.firebase", name = "firebase-analytics", version.ref = "firebaseAnalytics" }
 firebase-firestore = { group = "com.google.firebase", name = "firebase-firestore", version.ref = "firebaseFirestore" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth", version.ref = "firebaseAuth" }
+firebase-vertexai = { group = "com.google.firebase", name = "firebase-vertexai", version.ref = "firebaseVertexai" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
