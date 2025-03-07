@@ -23,5 +23,13 @@ public enum Departments {
     public String getDepartmentName() {
         return departmentName;
     }
-    
+
+    public static String[] getAllDepartments() {
+        Departments[] departments = Departments.values();
+        String[] departmentNames = new String[departments.length];
+        for (int i = 0; i < departments.length; i++) {
+            departmentNames[i] = departments[i].getDepartmentName();
+        }
+        return departmentNames;
+    }
 }

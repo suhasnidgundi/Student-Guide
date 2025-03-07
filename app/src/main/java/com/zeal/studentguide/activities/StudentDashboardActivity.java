@@ -8,16 +8,24 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.firestore.Query;
 import com.zeal.studentguide.databinding.ActivityStudentDashboardBinding;
 import com.zeal.studentguide.utils.FirebaseManager;
 import com.zeal.studentguide.utils.PreferenceManager;
 import com.zeal.studentguide.R;
+import com.zeal.studentguide.models.Announcement;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class StudentDashboardActivity extends AppCompatActivity {
     private ActivityStudentDashboardBinding binding;
     private PreferenceManager preferenceManager;
     private FirebaseManager firebaseManager;
-
+    private FirebaseFirestore db;
+    private int currentAnnouncementIndex = 0;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,6 +35,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         // Initialize FirebaseManager
         firebaseManager = FirebaseManager.getInstance();
         preferenceManager = new PreferenceManager(this);
+        db = FirebaseFirestore.getInstance();
 
         // Check if user is logged in, if not redirect to login
         if (!preferenceManager.isLoggedIn()) {
@@ -129,4 +138,5 @@ public class StudentDashboardActivity extends AppCompatActivity {
             }
         });
     }
+
 }

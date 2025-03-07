@@ -57,6 +57,11 @@
             android:windowSoftInputMode="adjustResize" />
 
         <activity
+            android:name=".activities.AnnouncementsActivity"
+            android:exported="false"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".activities.CollegeGuideBotActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />

@@ -33,7 +33,7 @@ public class AdminDashboardActivity extends AppCompatActivity {
         binding.cardCourseManagement.setOnClickListener(v ->
                 startActivity(new Intent(this, CourseManagementActivity.class)));
         binding.cardAnnouncements.setOnClickListener(v ->
-                Toast.makeText(this, "Announcements Clicked", Toast.LENGTH_SHORT).show());
+                startActivity(new Intent(this, AnnouncementsActivity.class)));
         binding.cardVirtualTourManagement.setOnClickListener(v ->
                 startActivity(new Intent(this, VirtualTourManagementActivity.class)));
         // Profile image click listener

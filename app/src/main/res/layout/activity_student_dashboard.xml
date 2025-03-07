@@ -75,6 +75,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:id="@+id/textNoAnnouncements"
                     android:gravity="center"
                     android:padding="16dp"
                     android:text="Discover, Connect, Succeed"
