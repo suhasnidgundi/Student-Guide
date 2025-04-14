@@ -1,29 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="primary_dark">#1565C0</color>
-    <color name="primary_light">#42A5F5</color>
-    <color name="accent">#FF4081</color>
+    <!-- Primary Brand Colors -->
+    <color name="primary">#1565C0</color>
+    <color name="primary_variant">#0D47A1</color>
+    <color name="primary_light">#64B5F6</color>
+
+    <!-- Secondary Colors -->
+    <color name="secondary">#26A69A</color>
+    <color name="secondary_variant">#00897B</color>
+    <color name="secondary_light">#80CBC4</color>
+
+    <!-- Accent Colors for Highlights and Buttons -->
+    <color name="accent">#FF6D00</color>
+    <color name="accent_light">#FFAB40</color>
+
+    <!-- Background Colors -->
+    <color name="background">#FFFFFF</color>
+    <color name="surface">#FFFFFF</color>
+    <color name="card_background">#F5F7FA</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#212121</color>
+    <color name="text_secondary">#757575</color>
+    <color name="text_tertiary">#9E9E9E</color>
+    <color name="text_on_primary">#FFFFFF</color>
+    <color name="text_on_secondary">#FFFFFF</color>
+
+    <!-- Functional Colors -->
+    <color name="success">#4CAF50</color>
+    <color name="error">#F44336</color>
+    <color name="warning">#FF9800</color>
+    <color name="info">#2196F3</color>
+
+    <!-- Chat UI Colors -->
+    <color name="bot_message_background">#F0F2F5</color>
+    <color name="bot_message_text">@color/text_primary</color>
+    <color name="user_message_background">#E3F2FD</color>
+    <color name="user_message_text">@color/text_primary</color>
+    <color name="timestamp_text">@color/text_tertiary</color>
+
+    <!-- Legacy colors for backward compatibility -->
+    <color name="colorPrimary">@color/primary</color>
+    <color name="colorPrimaryDark">@color/primary_variant</color>
+    <color name="colorAccent">@color/accent</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="colorPrimary">#1976D2</color>
-    <color name="colorPrimaryDark">#1565C0</color>
-    <color name="colorAccent">#2196F3</color>
     <color name="purple_500">#6200EE</color>
-    <color name="green_500">#4CAF50</color>
-    <color name="gray_800">#9E9E9E</color>
-    <color name="blue_500">#2196F3</color>
-    <color name="red_500">#F44336</color>
-    <color name="primary">#1565C0</color>
-    <color name="secondary">#546E7A</color>
+    <color name="green_500">@color/success</color>
+    <color name="gray_800">@color/text_tertiary</color>
+    <color name="blue_500">@color/info</color>
+    <color name="red_500">@color/error</color>
 
-    <color name="green">#4CAF50</color>
-    <color name="red">#F44336</color>
+    <!-- Missing colors causing errors -->
     <color name="gray">#9E9E9E</color>
-
-    <color name="bot_message_background">#F5F5F5</color>
-    <color name="bot_message_text">#000000</color>
-    <color name="user_message_background">#E3F2FD</color>
-    <color name="user_message_text">#000000</color>
-    <color name="timestamp_text">#757575</color>
-    <color name="background">#FFFFFF</color>
+    <color name="green">@color/success</color>
+    <color name="red">@color/error</color>
 </resources>
