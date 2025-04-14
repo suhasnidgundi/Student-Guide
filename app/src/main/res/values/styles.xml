@@ -62,21 +62,27 @@
         <item name="cornerSize">50%</item>
     </style>
 
-    <!-- Dashboard Card Styles -->
     <style name="DashboardCard" parent="Widget.MaterialComponents.CardView">
-        <item name="cardCornerRadius">12dp</item>
-        <item name="cardElevation">4dp</item>
-        <item name="contentPadding">16dp</item>
+        <item name="cardCornerRadius">16dp</item>
+        <item name="cardElevation">6dp</item>
+        <item name="contentPadding">8dp</item>
         <item name="android:layout_margin">8dp</item>
-        <item name="cardBackgroundColor">@color/card_background</item>
+        <item name="cardBackgroundColor">@color/white</item>
+        <item name="rippleColor">@color/colorAccent</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
+        <item name="android:layout_width">0dp</item>
+        <item name="android:layout_height">150dp</item>
+        <item name="android:layout_columnWeight">1</item>
     </style>
 
     <style name="DashboardCardText" parent="TextAppearance.MaterialComponents.Body1">
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">14sp</item>
         <item name="android:textColor">@color/text_primary</item>
         <item name="android:textAlignment">center</item>
         <item name="android:layout_gravity">center</item>
-        <item name="android:layout_marginTop">8dp</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
     </style>
 
     <style name="FullScreenDialogStyle" parent="Theme.MaterialComponents.Light.Dialog">
