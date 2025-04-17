@@ -1,5 +1,6 @@
 package com.zeal.studentguide.activities;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -14,6 +15,9 @@ import androidx.core.app.ActivityCompat;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.google.android.material.dialog.MaterialAlertDialogBuilder;
+import com.google.android.material.tabs.TabLayout;
+import com.google.android.material.tabs.TabLayoutMediator;
+import com.zeal.studentguide.R;
 import com.zeal.studentguide.adapters.ViewPagerAdapter;
 import com.zeal.studentguide.databinding.ActivityCollegeGuideBotBinding;
 
@@ -22,7 +26,7 @@ public class CollegeGuideBotActivity extends AppCompatActivity {
     private ActivityCollegeGuideBotBinding binding;
 
     private static final String[] REQUIRED_PERMISSIONS = {
-
+            Manifest.permission.RECORD_AUDIO
     };
 
     @Override
@@ -41,11 +45,21 @@ public class CollegeGuideBotActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         binding.toolbar.setNavigationOnClickListener(v -> onBackPressed());
+        getSupportActionBar().setTitle("College Guide Bot");
     }
 
     private void setupViewPager() {
         // Set up the ViewPager2 with the adapter
         binding.viewPager.setAdapter(new ViewPagerAdapter(this));
+
+        // Configure TabLayout with ViewPager2
+        new TabLayoutMediator(binding.tabLayout, binding.viewPager,
+                (tab, position) -> {
+                    tab.setText(position == 0 ? "Voice" : "Chat");
+                    tab.setIcon(position == 0 ?
+                            R.drawable.ic_mic : R.drawable.ic_chat);
+                }
+        ).attach();
 
         // Handle page selection changes
         binding.viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
