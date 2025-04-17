@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <!-- Primary Brand Colors -->
-    <color name="primary">#1565C0</color>
-    <color name="primary_variant">#0D47A1</color>
-    <color name="primary_light">#64B5F6</color>
+    <color name="primary">#08c2fc</color>
+    <color name="primary_variant">#0299D1</color>
+    <color name="primary_light">#64DFFF</color>
 
     <!-- Secondary Colors -->
     <color name="secondary">#26A69A</color>
@@ -11,8 +11,8 @@
     <color name="secondary_light">#80CBC4</color>
 
     <!-- Accent Colors for Highlights and Buttons -->
-    <color name="accent">#FF6D00</color>
-    <color name="accent_light">#FFAB40</color>
+    <color name="accent">#08c2fc</color>
+    <color name="accent_light">#64DFFF</color>
 
     <!-- Background Colors -->
     <color name="background">#FFFFFF</color>
