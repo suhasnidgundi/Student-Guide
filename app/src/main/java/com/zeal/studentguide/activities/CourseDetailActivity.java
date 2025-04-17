@@ -1,6 +1,10 @@
 package com.zeal.studentguide.activities;
 
+import android.content.ActivityNotFoundException;
+import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -9,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 import com.zeal.studentguide.R;
@@ -20,6 +25,7 @@ import com.zeal.studentguide.models.CourseContent;
 import com.zeal.studentguide.models.CourseMaterial;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -48,6 +54,7 @@ public class CourseDetailActivity extends AppCompatActivity {
         setupToolbar();
         loadCourseDetails();
         loadCourseContent();
+        loadCourseMaterials();
     }
 
     private void init() {
@@ -78,25 +85,41 @@ public class CourseDetailActivity extends AppCompatActivity {
     }
 
     private void loadCourseMaterials() {
-        database.collection("courses")
-                .document(courseId)
-                .collection("materials")
+        database.collection("course_materials")
+                .whereEqualTo("courseId", courseId)
                 .get()
                 .addOnSuccessListener(querySnapshot -> {
                     Map<String, List<CourseMaterial>> materialsBySection = new HashMap<>();
 
                     for (DocumentSnapshot doc : querySnapshot.getDocuments()) {
-                        CourseMaterial material = doc.toObject(CourseMaterial.class);
-                        if (material != null) {
-                            String section = material.getSection();
-                            materialsBySection.computeIfAbsent(section, k -> new ArrayList<>())
-                                    .add(material);
+                        try {
+                            // Try to get the data as a Map first
+                            Map<String, Object> data = doc.getData();
+                            if (data != null) {
+                                // Create CourseMaterial manually from the map
+                                CourseMaterial material = new CourseMaterial(
+                                        doc.getId(),
+                                        (String) data.get("title"), // Note: using "title" from DTO
+                                        (String) data.get("type"),
+                                        (String) data.get("link"),  // Note: using "link" from DTO
+                                        "General" // Default section if not specified
+                                );
+
+                                materialsBySection.computeIfAbsent("General", k -> new ArrayList<>())
+                                        .add(material);
+                            }
+                        } catch (Exception e) {
+                            showToast("Error parsing material: " + e.getMessage());
                         }
                     }
 
-                    displayMaterialSections(materialsBySection);
+                    if (materialsBySection.isEmpty()) {
+                        showToast("No materials found for this course");
+                    } else {
+                        displayMaterialSections(materialsBySection);
+                    }
                 })
-                .addOnFailureListener(e -> showToast("Error loading course materials"));
+                .addOnFailureListener(e -> showToast("Error loading course materials: " + e.getMessage()));
     }
 
     private void displayMaterialSections(Map<String, List<CourseMaterial>> materialsBySection) {
@@ -147,9 +170,142 @@ public class CourseDetailActivity extends AppCompatActivity {
     }
 
     private void openMaterial(CourseMaterial material) {
-        // Implement material opening logic here
-        // Could open PDF viewer, download file, etc.
-        showToast("Opening: " + material.getName());
+        try {
+            String url = material.getUrl();
+            String type = material.getType();
+
+            if (url == null || url.isEmpty()) {
+                showToast("Material URL is not available");
+                return;
+            }
+
+            Uri uri = Uri.parse(url);
+            Intent intent;
+
+            // Handle different material types
+            switch (type.toLowerCase()) {
+                case "pdf":
+                    // For PDF files
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "application/pdf");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_NO_HISTORY);
+                    intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+                    // Try to open with installed PDF reader
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        // If no PDF reader is installed, open in browser
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "video":
+                    // For video files
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "video/*");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "audio":
+                    // For audio files
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "audio/*");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "document":
+                case "docx":
+                case "doc":
+                    // For Word documents
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "application/msword");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "spreadsheet":
+                case "xlsx":
+                case "xls":
+                    // For Excel files
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "application/vnd.ms-excel");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "presentation":
+                case "pptx":
+                case "ppt":
+                    // For PowerPoint files
+                    intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(uri, "application/vnd.ms-powerpoint");
+                    try {
+                        startActivity(intent);
+                    } catch (ActivityNotFoundException e) {
+                        openInBrowser(url);
+                    }
+                    break;
+
+                case "textbook":
+                case "article":
+                case "reference":
+                default:
+                    // Default case: open in browser
+                    openInBrowser(url);
+                    break;
+            }
+
+            // Log material access (optional)
+            logMaterialAccess(material.getId());
+
+        } catch (Exception e) {
+            showToast("Error opening material: " + e.getMessage());
+        }
+    }
+
+    private void openInBrowser(String url) {
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
+
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        try {
+            startActivity(browserIntent);
+        } catch (ActivityNotFoundException e) {
+            showToast("No browser application found");
+        }
+    }
+
+    private void logMaterialAccess(String materialId) {
+        // Optional: Log that student accessed this material
+        // You can implement analytics or tracking here
+        if (materialId == null) return;
+
+        // Example: Log to Firebase Analytics or Firestore
+        String userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        Map<String, Object> accessLog = new HashMap<>();
+        accessLog.put("userId", userId);
+        accessLog.put("materialId", materialId);
+        accessLog.put("accessTimestamp", new Date());
+
+        database.collection("material_access_logs")
+                .add(accessLog)
+                .addOnFailureListener(e -> Log.e("CourseDetail", "Failed to log material access", e));
     }
 
     private String capitalizeFirst(String str) {

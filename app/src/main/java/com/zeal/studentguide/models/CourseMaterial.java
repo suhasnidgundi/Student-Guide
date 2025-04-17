@@ -7,6 +7,10 @@ public class CourseMaterial {
     private String url;
     private String section;
 
+    public CourseMaterial() {
+        // Required empty constructor for Firestore
+    }
+
     public CourseMaterial(String id, String name, String type, String url, String section) {
         this.id = id;
         this.name = name;
