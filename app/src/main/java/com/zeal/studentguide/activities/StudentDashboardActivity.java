@@ -2,6 +2,7 @@ package com.zeal.studentguide.activities;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.PopupMenu;
 import android.widget.Toast;
@@ -17,7 +18,9 @@ import com.zeal.studentguide.R;
 import com.zeal.studentguide.models.Announcement;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class StudentDashboardActivity extends AppCompatActivity {
@@ -44,6 +47,7 @@ public class StudentDashboardActivity extends AppCompatActivity {
         }
 
         setupProfile();
+        loadAndDisplayAnnouncements();
         setupClickListeners();
     }
 
@@ -137,6 +141,55 @@ public class StudentDashboardActivity extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+    }
+
+    private void loadAndDisplayAnnouncements() {
+        // Get the student's department
+        String studentDepartment = preferenceManager.getUserDepartment();
+
+        // Query to get announcements for either "All Departments" or the student's specific department
+        db.collection("announcements")
+                .orderBy("timestamp", Query.Direction.DESCENDING)
+                .get()
+                .addOnSuccessListener(queryDocumentSnapshots -> {
+                    List<Announcement> announcements = queryDocumentSnapshots.toObjects(Announcement.class);
+                    List<Announcement> relevantAnnouncements = new ArrayList<>();
+
+                    // Filter announcements for current department or "All Departments"
+                    for (Announcement announcement : announcements) {
+                        if (announcement.getDepartment().equals("All Departments") ||
+                                announcement.getDepartment().equals(studentDepartment)) {
+                            relevantAnnouncements.add(announcement);
+                        }
+                    }
+
+                    // Display the announcement or show "No announcements" text
+                    if (!relevantAnnouncements.isEmpty()) {
+                        displayLatestAnnouncement(relevantAnnouncements);
+                    } else {
+                        binding.textNoAnnouncements.setText("No announcements available");
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle failure
+                    binding.textNoAnnouncements.setText("Failed to load announcements");
+                });
+    }
+
+    private void displayLatestAnnouncement(List<Announcement> announcements) {
+        if (announcements.isEmpty()) return;
+
+        // Get the most recent announcement
+        Announcement latest = announcements.get(0);
+
+        // Update the TextView with the announcement message
+        binding.textNoAnnouncements.setText(latest.getMessage());
+
+        // Make text marquee scrollable if it's longer than the view
+        binding.textNoAnnouncements.setSelected(true);
+        binding.textNoAnnouncements.setSingleLine(true);
+        binding.textNoAnnouncements.setMarqueeRepeatLimit(-1); // -1 means forever
+        binding.textNoAnnouncements.setEllipsize(TextUtils.TruncateAt.MARQUEE);
     }
 
 }

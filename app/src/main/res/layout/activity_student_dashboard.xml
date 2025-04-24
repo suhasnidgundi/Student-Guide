@@ -73,14 +73,21 @@
                 app:cardCornerRadius="12dp">
 
                 <TextView
+                    android:id="@+id/textNoAnnouncements"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/textNoAnnouncements"
                     android:gravity="center"
                     android:padding="16dp"
                     android:text="Discover, Connect, Succeed"
                     android:textColor="@color/white"
-                    android:textSize="18sp" />
+                    android:textSize="18sp"
+                    android:ellipsize="marquee"
+                    android:focusable="true"
+                    android:focusableInTouchMode="true"
+                    android:marqueeRepeatLimit="marquee_forever"
+                    android:scrollHorizontally="true"
+                    android:singleLine="true" />
+
             </com.google.android.material.card.MaterialCardView>
 
             <!-- GridLayout with columnCount=2 for 2x2 grid -->
